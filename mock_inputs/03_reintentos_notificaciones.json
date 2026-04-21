@@ -1,0 +1,23 @@
+{
+  "caseId": "mock-03",
+  "title": "Caso 3 - Reintentos automaticos de notificaciones",
+  "description": "Historia backend donde UX no participa. Se activa el agente tecnico.",
+  "expectedAgents": ["clarity", "qa", "technical"],
+  "expectedStatus": "amarillo",
+  "request": {
+    "storyId": "story-003",
+    "title": "Reintentos automaticos",
+    "storyText": "Como sistema, necesito reintentar el envio de notificaciones fallidas. No se especifica el intervalo entre reintentos, ni si se usa backoff exponencial. No esta claro que tipo de notificaciones aplica (email, push, SMS). No se definio que pasa despues del ultimo intento fallido ni como se alerta al equipo de soporte. Tampoco se menciona si hay un limite de cola o que pasa si el volumen de mensajes fallidos es muy alto.",
+    "provider": {
+      "type": "ollama",
+      "model": "qwen2.5:3b",
+      "endpoint": "http://localhost:11434",
+      "temperature": 0.1
+    },
+    "logging": {
+      "level": "full",
+      "includePrompts": true,
+      "includeResponses": true
+    }
+  }
+}

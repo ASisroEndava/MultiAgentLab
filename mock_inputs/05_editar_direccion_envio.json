@@ -1,0 +1,23 @@
+{
+  "caseId": "mock-05",
+  "title": "Caso 5 - Editar direccion de envio",
+  "description": "Muestra resolucion de conflicto entre UX y tecnico.",
+  "expectedAgents": ["clarity", "qa", "technical", "ux"],
+  "expectedStatus": "amarillo",
+  "request": {
+    "storyId": "story-005",
+    "title": "Editar direccion de envio",
+    "storyText": "Como usuario, quiero editar mi direccion de envio desde mi perfil. El formulario deberia ser facil de usar y mostrar sugerencias de autocompletado con la API de Google Maps. No se especifica si se valida la direccion contra un servicio externo, que pasa si la API externa falla, ni como afecta a pedidos ya en curso. La UX quiere un formulario inline editable, pero el equipo tecnico sugiere un modal por restricciones del framework. No se definio si se guarda historial de direcciones anteriores ni si hay limite de direcciones por cuenta.",
+    "provider": {
+      "type": "ollama",
+      "model": "qwen2.5:3b",
+      "endpoint": "http://localhost:11434",
+      "temperature": 0.2
+    },
+    "logging": {
+      "level": "full",
+      "includePrompts": true,
+      "includeResponses": true
+    }
+  }
+}

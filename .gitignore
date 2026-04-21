@@ -1,0 +1,22 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+
+# Visual Studio
+.vs/
+*.vsidx
+launchSettings.json
+
+# Logs
+logs/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
