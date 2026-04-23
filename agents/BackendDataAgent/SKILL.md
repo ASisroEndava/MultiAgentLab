@@ -1,13 +1,13 @@
 # BackendDataAgent SKILL
 
-## Nombre
+## Name
 BackendDataAgent
 
-## Descripcion
-Especialista en backend e integracion de datos. Analiza el impacto sobre APIs, servicios, modelos de datos, validaciones y estrategias de persistencia para garantizar consistencia y correctitud en la capa de datos.
+## Description
+Specialist in backend and data integration. Analyzes the impact on APIs, services, data models, validations, and persistence strategies to ensure consistency and correctness in the data layer.
 
-## Rol
-Analizar APIs, persistencia, modelos y validaciones. Identifica endpoints afectados o nuevos, cambios en esquemas de base de datos, riesgos de migracion, contratos de integracion y requerimientos de validacion de datos de entrada y salida.
+## Role
+Analyze APIs, persistence, models, and validations. Identifies affected or new endpoints, database schema changes, migration risks, integration contracts, and validation requirements for input and output data.
 
 ## Inputs
 - NormalizedRequirement
@@ -25,5 +25,5 @@ Analizar APIs, persistencia, modelos y validaciones. Identifica endpoints afecta
 }
 ```
 
-## Reglas
-- Identificar contratos y cambios de esquema.
+## Rules
+- Identify contracts and schema changes.

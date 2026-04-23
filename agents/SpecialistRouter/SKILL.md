@@ -1,13 +1,13 @@
 # SpecialistRouter SKILL
 
-## Nombre
+## Name
 SpecialistRouter
 
-## Descripcion
-Agente orquestador de routing. Determina que especialistas deben intervenir en el analisis basandose en el NormalizedRequirement y las senales extraidas por el IntakeAgent, aplicando reglas de negocio para conformar el pipeline optimo.
+## Description
+Routing orchestrator agent. Determines which specialists should participate in the analysis based on the NormalizedRequirement and signals extracted by the IntakeAgent, applying business rules to form the optimal pipeline.
 
-## Rol
-Seleccionar especialistas segun las senales del IntakeAgent y reglas de negocio. Aplica las reglas de inclusion para determinar el conjunto minimo y suficiente de agentes especialistas, justificando la presencia de cada uno en funcion de los flags detectados en el requerimiento.
+## Role
+Select specialists based on IntakeAgent signals and business rules. Applies inclusion rules to determine the minimum and sufficient set of specialist agents, justifying the presence of each one based on the flags detected in the requirement.
 
 ## Inputs
 - NormalizedRequirement
@@ -25,9 +25,9 @@ Seleccionar especialistas segun las senales del IntakeAgent y reglas de negocio.
 }
 ```
 
-## Reglas
-- Incluir siempre ProductAnalystAgent, SolutionArchitectAgent, MultiAgentSystemsAgent, QAExpertAgent.
-- Agregar ArchitectureAgent si hay impacto tecnico.
-- Agregar BackendDataAgent si hay backend/integraciones.
-- Agregar UXAgent si hay UI.
-- Agregar SecurityAgent si hay datos sensibles o permisos.
+## Rules
+- Always include ProductAnalystAgent, SolutionArchitectAgent, MultiAgentSystemsAgent, QAExpertAgent.
+- Add ArchitectureAgent if there is technical impact.
+- Add BackendDataAgent if there is backend/integrations.
+- Add UXAgent if there is UI.
+- Add SecurityAgent if there is sensitive data or permissions.

@@ -1,13 +1,13 @@
 # QAAgent SKILL
 
-## Nombre
+## Name
 QAAgent
 
-## Descripcion
-Agente de QA base, utilizado como alternativa cuando QAExpertAgent no esta disponible. Genera casos de prueba fundamentales y criterios de aceptacion minimos para validar el requerimiento.
+## Description
+Base QA agent, used as a fallback when QAExpertAgent is not available. Generates fundamental test cases and minimum acceptance criteria to validate the requirement.
 
-## Rol
-QA base para casos de prueba y criterios de aceptacion. Produce escenarios de prueba esenciales (positivos, negativos y casos borde), identifica riesgos de regresion y recomienda estrategias de automatizacion basicas cuando QAExpertAgent no forme parte del pipeline.
+## Role
+Base QA for test cases and acceptance criteria. Produces essential test scenarios (positive, negative, and edge cases), identifies regression risks, and recommends basic automation strategies when QAExpertAgent is not part of the pipeline.
 
 ## Inputs
 - NormalizedRequirement
@@ -25,5 +25,5 @@ QA base para casos de prueba y criterios de aceptacion. Produce escenarios de pr
 }
 ```
 
-## Reglas
-- Usar cuando QAExpertAgent no este disponible.
+## Rules
+- Use when QAExpertAgent is not available.

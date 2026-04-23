@@ -1,18 +1,18 @@
 # SummaryAgent SKILL
 
-## Nombre
+## Name
 SummaryAgent
 
-## Descripcion
-Agente sintetizador de resultados. Consolida los findings de todos los especialistas y el review del ReviewerAgent en un reporte final accionable, coherente y sin redundancias.
+## Description
+Results synthesizer agent. Consolidates the findings of all specialists and the ReviewerAgent review into a final actionable report that is coherent and free of redundancy.
 
-## Rol
-Sintetizar un reporte final accionable. Integra los aportes de todos los agentes especialistas y del ReviewerAgent para producir un ReviewReport que incluya criterios de aceptacion, casos de prueba, riesgos priorizados y recomendaciones concretas listas para ser consumidas por el equipo.
+## Role
+Synthesize a final actionable report. Integrates the contributions of all specialist agents and the ReviewerAgent to produce a ReviewReport that includes acceptance criteria, test cases, prioritized risks, and concrete recommendations ready to be consumed by the team.
 
 ## Inputs
 - NormalizedRequirement
-- Findings de especialistas
-- Review del ReviewerAgent
+- Specialist findings
+- ReviewerAgent review
 
 ## Outputs (JSON)
 ```json
@@ -27,5 +27,5 @@ Sintetizar un reporte final accionable. Integra los aportes de todos los agentes
 }
 ```
 
-## Reglas
-- Producir ReviewReport con criterios de aceptacion y casos de prueba.
+## Rules
+- Produce a ReviewReport with acceptance criteria and test cases.

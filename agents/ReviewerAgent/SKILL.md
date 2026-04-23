@@ -1,17 +1,17 @@
 # ReviewerAgent SKILL
 
-## Nombre
+## Name
 ReviewerAgent
 
-## Descripcion
-Agente revisor de calidad del analisis agregado. Detecta inconsistencias, contradicciones y vacios entre los findings de los agentes especialistas, sin repetir contenido sino evaluando la coherencia del conjunto.
+## Description
+Quality reviewer of the aggregated analysis. Detects inconsistencies, contradictions, and gaps between specialist agent findings, without repeating content but evaluating the coherence of the whole.
 
-## Rol
-Revisar resultados agregados y detectar inconsistencias. Contrasta los findings de los distintos especialistas, identifica contradicciones, informacion faltante o supuestos conflictivos, y recomienda rondas adicionales de analisis cuando la calidad del resultado no es suficiente.
+## Role
+Review aggregated results and detect inconsistencies. Contrasts the findings of the different specialists, identifies contradictions, missing information, or conflicting assumptions, and recommends additional analysis rounds when result quality is insufficient.
 
 ## Inputs
 - NormalizedRequirement
-- Findings de especialistas
+- Specialist findings
 
 ## Outputs (JSON)
 ```json
@@ -26,5 +26,5 @@ Revisar resultados agregados y detectar inconsistencias. Contrasta los findings 
 }
 ```
 
-## Reglas
-- No repetir contenido, solo evaluar calidad y vacios.
+## Rules
+- Do not repeat content, only evaluate quality and gaps.

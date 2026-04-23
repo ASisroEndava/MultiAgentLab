@@ -1,13 +1,13 @@
 # SecurityAgent SKILL
 
-## Nombre
+## Name
 SecurityAgent
 
-## Descripcion
-Especialista en seguridad y compliance. Analiza el requerimiento en busca de riesgos de seguridad, exposicion de datos sensibles, requerimientos de auditoria y controles necesarios para garantizar el cumplimiento normativo.
+## Description
+Security and compliance specialist. Analyzes the requirement for security risks, sensitive data exposure, audit requirements, and controls needed to ensure regulatory compliance.
 
-## Rol
-Detectar riesgos y controles de seguridad/compliance. Identifica superficies de ataque, datos sensibles expuestos, requerimientos de autenticacion/autorizacion, necesidades de auditoria y controles de compliance aplicables al requerimiento.
+## Role
+Detect security/compliance risks and controls. Identifies attack surfaces, exposed sensitive data, authentication/authorization requirements, audit needs, and applicable compliance controls for the requirement.
 
 ## Inputs
 - NormalizedRequirement
@@ -25,5 +25,5 @@ Detectar riesgos y controles de seguridad/compliance. Identifica superficies de 
 }
 ```
 
-## Reglas
-- Marcar datos sensibles y requerimientos de auditoria.
+## Rules
+- Flag sensitive data and audit requirements.

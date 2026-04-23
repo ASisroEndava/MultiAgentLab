@@ -1,13 +1,13 @@
 # IntakeAgent SKILL
 
-## Nombre
+## Name
 IntakeAgent
 
-## Descripcion
-Agente de entrada responsable de recibir, normalizar y estructurar el requerimiento crudo del usuario. Extrae senales clave que guian el routing hacia los agentes especialistas adecuados.
+## Description
+Entry agent responsible for receiving, normalizing, and structuring the raw user requirement. Extracts key signals that guide routing toward the appropriate specialist agents.
 
-## Rol
-Normalizar el requerimiento y extraer senales relevantes para el routing. Parsea el input del usuario, produce un NormalizedRequirement canonico, identifica flags de dominio (hasUi, hasBackendImpact, hasIntegration, hasSensitiveData, hasSecurityImplications) y declara supuestos explicitamente cuando faltan datos.
+## Role
+Normalize the requirement and extract relevant signals for routing. Parses the user input, produces a canonical NormalizedRequirement, identifies domain flags (hasUi, hasBackendImpact, hasIntegration, hasSensitiveData, hasSecurityImplications), and explicitly declares assumptions when data is missing.
 
 ## Inputs
 - RequirementInput (title, description, type, businessContext, technicalConstraints, additionalContext)
@@ -25,7 +25,7 @@ Normalizar el requerimiento y extraer senales relevantes para el routing. Parsea
 }
 ```
 
-## Reglas
-- Producir un resumen canonico.
-- Identificar flags: hasUi, hasBackendImpact, hasIntegration, hasSensitiveData, hasSecurityImplications.
-- Declarar supuestos si faltan datos.
+## Rules
+- Produce a canonical summary.
+- Identify flags: hasUi, hasBackendImpact, hasIntegration, hasSensitiveData, hasSecurityImplications.
+- Declare assumptions if data is missing.
