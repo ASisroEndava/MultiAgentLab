@@ -7,6 +7,14 @@ using MultiAgentLab.Api.Infrastructure.Mocks;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Angular", policy =>
+        policy.WithOrigins("http://localhost:4200", "http://localhost:4201")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -30,6 +38,8 @@ builder.Services.AddSingleton<IReviewAgent, ComplianceAgent>();
 builder.Services.AddSingleton<ReviewSupervisor>();
 
 var app = builder.Build();
+
+app.UseCors("Angular");
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

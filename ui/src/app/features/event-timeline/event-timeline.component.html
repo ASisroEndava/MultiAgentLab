@@ -1,0 +1,52 @@
+<mat-card class="panel">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>timeline</mat-icon> Event Timeline
+    </mat-card-title>
+    <div class="header-actions">
+      <mat-form-field appearance="outline" class="filter-select">
+        <mat-select [(ngModel)]="filterType">
+          @for (opt of filterOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (state.overallState() === 'idle') {
+      <div class="empty-state">
+        <mat-icon>query_stats</mat-icon>
+        <p>Events will stream here during execution.</p>
+      </div>
+    }
+
+    <div class="event-list" #eventList>
+      @for (item of displayEvents(); track item.event.timestamp + item.event.eventType) {
+        <div class="event-row" [class]="item.cssClass" (click)="toggle(item)">
+          <span class="ev-time">{{ item.event.timestamp | date:'HH:mm:ss' }}</span>
+          <mat-icon class="ev-icon">{{ item.icon }}</mat-icon>
+          <span class="ev-label">{{ item.label }}</span>
+          @if (item.summary) {
+            <span class="ev-summary">{{ item.summary }}</span>
+          }
+          @if (item.collapsible) {
+            <mat-icon class="ev-expand">{{ item.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+          }
+        </div>
+        @if (item.expanded && item.detail) {
+          <div class="ev-detail">{{ item.detail }}</div>
+        }
+      }
+
+      @if (state.isExecuting()) {
+        <div class="event-row ev-polling">
+          <span class="ev-time">—</span>
+          <mat-icon class="ev-icon spin">autorenew</mat-icon>
+          <span class="ev-label">Polling for events…</span>
+        </div>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>

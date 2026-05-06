@@ -1,0 +1,38 @@
+<mat-card class="panel">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>hub</mat-icon> Agent Decisions
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (state.overallState() === 'idle') {
+      <div class="empty-state">
+        <mat-icon>smart_toy</mat-icon>
+        <p>Agent decisions will appear here once a review starts.</p>
+      </div>
+    }
+
+    @if (state.isExecuting() && state.agentCards().length === 0) {
+      <div class="waiting-state">
+        <mat-spinner diameter="32"></mat-spinner>
+        <p>Waiting for agent selection…</p>
+      </div>
+    }
+
+    @if (state.agentCards().length > 0) {
+      <div class="cards-list">
+        @for (card of state.agentCards(); track card.name) {
+          <app-agent-card [card]="card" />
+        }
+      </div>
+    }
+
+    @if (state.isComplete() && state.totalMs()) {
+      <div class="timing">
+        <mat-icon>timer</mat-icon>
+        Completed in {{ (state.totalMs()! / 1000) | number:'1.1-1' }}s
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

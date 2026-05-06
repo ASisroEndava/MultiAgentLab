@@ -1,0 +1,114 @@
+<mat-card class="panel">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>edit_note</mat-icon> Story Input
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (loadError()) {
+      <div class="load-error">
+        <mat-icon>warning</mat-icon> {{ loadError() }}
+      </div>
+    }
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Load mock case</mat-label>
+      <mat-select [(ngModel)]="selectedMockCase" (ngModelChange)="onMockCaseSelect($event)">
+        <mat-option [value]="null">— Manual input —</mat-option>
+        @for (mc of mockCases(); track mc.caseId) {
+          <mat-option [value]="mc">
+            <span class="mock-option-title">{{ mc.title }}</span>
+            <span class="mock-option-desc"> · {{ mc.expectedStatus }}</span>
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (selectedMockCase()) {
+      <div class="mock-info">
+        <mat-icon>info</mat-icon>
+        <span>{{ selectedMockCase()!.description }}</span>
+      </div>
+      <div class="mock-agents">
+        @for (a of selectedMockCase()!.expectedAgents; track a) {
+          <span class="agent-chip">{{ a }}</span>
+        }
+      </div>
+    }
+
+    @if (!selectedMockCase()) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Story ID</mat-label>
+        <input matInput [(ngModel)]="storyId" placeholder="story-001" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Title</mat-label>
+        <input matInput [(ngModel)]="storyTitle" placeholder="Short title" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>User story text</mat-label>
+        <textarea matInput [(ngModel)]="storyText" rows="5"
+          placeholder="As a user, I want to..."></textarea>
+      </mat-form-field>
+
+      <div class="row-fields">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Provider</mat-label>
+          <mat-select [(ngModel)]="providerType" (ngModelChange)="onProviderChange()">
+            <mat-option value="ollama">Ollama</mat-option>
+            <mat-option value="bedrock">Bedrock</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Model</mat-label>
+          <mat-select [(ngModel)]="model">
+            @for (m of availableModels; track m) {
+              <mat-option [value]="m">{{ m }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      @if (providerType() === 'ollama') {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Ollama endpoint</mat-label>
+          <input matInput [(ngModel)]="endpoint" />
+        </mat-form-field>
+      }
+
+      <div class="row-fields">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Logging</mat-label>
+          <mat-select [(ngModel)]="loggingLevel">
+            <mat-option value="basic">Basic</mat-option>
+            <mat-option value="standard">Standard</mat-option>
+            <mat-option value="full">Full</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    }
+  </mat-card-content>
+
+  <mat-card-actions>
+    <button mat-raised-button color="primary"
+      [disabled]="!canSubmit"
+      (click)="submit()">
+      @if (submitting()) {
+        <mat-spinner diameter="18" color="accent"></mat-spinner>
+      } @else {
+        <mat-icon>play_arrow</mat-icon>
+      }
+      Review Story
+    </button>
+
+    @if (state.isExecuting() || state.isComplete()) {
+      <button mat-stroked-button (click)="state.reset(); reset()">
+        <mat-icon>refresh</mat-icon> Reset
+      </button>
+    }
+  </mat-card-actions>
+</mat-card>
