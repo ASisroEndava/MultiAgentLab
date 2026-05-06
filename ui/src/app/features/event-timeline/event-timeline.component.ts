@@ -44,6 +44,7 @@ export class EventTimelineComponent {
     { value: 'agent_failed', label: 'Agent failed' },
     { value: 'final_result_generated', label: 'Final result' },
     { value: 'request_completed', label: 'Completed' },
+    { value: 'execution_failed', label: 'Execution failed' },
   ];
 
   protected readonly displayEvents = computed<EventDisplay[]>(() => {
@@ -77,6 +78,7 @@ export class EventTimelineComponent {
       supervisor_resolution:   { icon: 'task_alt',        cssClass: 'ev-resolution', label: 'Supervisor resolution' },
       final_result_generated:  { icon: 'star',            cssClass: 'ev-result',     label: 'Final result generated' },
       request_completed:       { icon: 'stop_circle',     cssClass: 'ev-done',       label: 'Execution completed' },
+      execution_failed:        { icon: 'dangerous',       cssClass: 'ev-exec-fail',  label: 'EXECUTION FAILED' },
     };
 
     const meta = map[e.eventType] ?? { icon: 'info', cssClass: 'ev-default', label: e.eventType };

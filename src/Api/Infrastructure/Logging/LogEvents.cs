@@ -89,7 +89,15 @@ public static class LogEvents
         ExecutionId = executionId,
         Timestamp = DateTimeOffset.UtcNow,
         EventType = "final_result_generated",
-        Data = new { status = result.Status, invokedAgents = result.InvokedAgents, issueCount = result.Issues.Count }
+        Data = result
+    };
+
+    public static ExecutionLogEvent ExecutionFailed(string executionId, string error) => new()
+    {
+        ExecutionId = executionId,
+        Timestamp = DateTimeOffset.UtcNow,
+        EventType = "execution_failed",
+        Data = new { error }
     };
 
     public static ExecutionLogEvent RequestCompleted(string executionId, double totalMs) => new()

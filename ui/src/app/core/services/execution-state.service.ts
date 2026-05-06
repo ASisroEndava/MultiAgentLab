@@ -102,7 +102,7 @@ export class ExecutionStateService {
       case 'agent_completed':
         this.agentCards.update(cards =>
           cards.map(c => c.name === data['agent']
-            ? { ...c, state: 'completed' as const, score: data['score'] as number, issueCount: data['issues'] as number }
+            ? { ...c, state: 'completed' as const, score: data['score'] as number, issueCount: (data['issues'] as unknown[])?.length ?? 0 }
             : c)
         );
         break;
@@ -114,7 +114,10 @@ export class ExecutionStateService {
         );
         break;
       case 'final_result_generated':
-        this.finalResult.set(data as unknown as ReviewResult);
+        this.finalResult.set(event.data as unknown as ReviewResult);
+        break;
+      case 'execution_failed':
+        this.overallState.set('error');
         break;
       case 'request_completed':
         this.totalMs.set(data['totalMs'] as number ?? null);

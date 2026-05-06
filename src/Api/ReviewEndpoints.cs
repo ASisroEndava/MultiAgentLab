@@ -121,10 +121,6 @@ public static class ReviewEndpoints
         CancellationToken cancellationToken)
     {
         var logs = await logger.GetLogsAsync(executionId, cancellationToken);
-
-        if (logs.Count == 0)
-            return Results.NotFound(new { message = $"No logs found for execution {executionId}" });
-
         return Results.Ok(logs);
     }
 
@@ -184,6 +180,7 @@ public static class ReviewEndpoints
         string caseId,
         MockCaseLoader mockLoader,
         ReviewSupervisor supervisor,
+        IExecutionLogger executionLogger,
         CancellationToken cancellationToken)
     {
         var mockCase = await mockLoader.GetCaseAsync(caseId, cancellationToken);
@@ -199,8 +196,9 @@ public static class ReviewEndpoints
             {
                 await supervisor.ReviewAsync(mockCase.Request, CancellationToken.None, executionId);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                await executionLogger.LogAsync(LogEvents.ExecutionFailed(executionId, ex.Message));
             }
         });
 
