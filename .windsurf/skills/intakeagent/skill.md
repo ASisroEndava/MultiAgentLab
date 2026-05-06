@@ -1,10 +1,10 @@
-# IntakeAgent SKILL
+---
+name: IntakeAgent
+description: Entry agent responsible for receiving, normalizing, and structuring the raw user requirement. Extracts key signals that guide routing toward the appropriate specialist agents.
+tags: [intake, normalization, routing, requirements]
+---
 
-## Name
-IntakeAgent
-
-## Description
-Entry agent responsible for receiving, normalizing, and structuring the raw user requirement. Extracts key signals that guide routing toward the appropriate specialist agents.
+# IntakeAgent Skill
 
 ## Role
 Normalize the requirement and extract relevant signals for routing. Parses the user input, produces a canonical NormalizedRequirement, identifies domain flags (hasUi, hasBackendImpact, hasIntegration, hasSensitiveData, hasSecurityImplications), and explicitly declares assumptions when data is missing.

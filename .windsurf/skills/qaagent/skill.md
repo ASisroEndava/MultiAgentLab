@@ -1,10 +1,10 @@
-# QAAgent SKILL
+---
+name: QAAgent
+description: Base QA agent, used as a fallback when QAExpertAgent is not available. Generates fundamental test cases and minimum acceptance criteria to validate the requirement.
+tags: [qa, testing, fallback, regression]
+---
 
-## Name
-QAAgent
-
-## Description
-Base QA agent, used as a fallback when QAExpertAgent is not available. Generates fundamental test cases and minimum acceptance criteria to validate the requirement.
+# QAAgent Skill
 
 ## Role
 Base QA for test cases and acceptance criteria. Produces essential test scenarios (positive, negative, and edge cases), identifies regression risks, and recommends basic automation strategies when QAExpertAgent is not part of the pipeline.

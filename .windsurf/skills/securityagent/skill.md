@@ -1,10 +1,10 @@
-# SecurityAgent SKILL
+---
+name: SecurityAgent
+description: Security and compliance specialist. Analyzes the requirement for security risks, sensitive data exposure, audit requirements, and controls needed to ensure regulatory compliance.
+tags: [security, compliance, audit, sensitive-data]
+---
 
-## Name
-SecurityAgent
-
-## Description
-Security and compliance specialist. Analyzes the requirement for security risks, sensitive data exposure, audit requirements, and controls needed to ensure regulatory compliance.
+# SecurityAgent Skill
 
 ## Role
 Detect security/compliance risks and controls. Identifies attack surfaces, exposed sensitive data, authentication/authorization requirements, audit needs, and applicable compliance controls for the requirement.

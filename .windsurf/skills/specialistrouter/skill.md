@@ -1,10 +1,10 @@
-# SpecialistRouter SKILL
+---
+name: SpecialistRouter
+description: Routing orchestrator agent. Determines which specialists should participate in the analysis based on the NormalizedRequirement and signals extracted by the IntakeAgent, applying business rules to form the optimal pipeline.
+tags: [routing, orchestration, pipeline, specialist-selection]
+---
 
-## Name
-SpecialistRouter
-
-## Description
-Routing orchestrator agent. Determines which specialists should participate in the analysis based on the NormalizedRequirement and signals extracted by the IntakeAgent, applying business rules to form the optimal pipeline.
+# SpecialistRouter Skill
 
 ## Role
 Select specialists based on IntakeAgent signals and business rules. Applies inclusion rules to determine the minimum and sufficient set of specialist agents, justifying the presence of each one based on the flags detected in the requirement.

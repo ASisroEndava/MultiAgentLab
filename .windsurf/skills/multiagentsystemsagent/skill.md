@@ -1,10 +1,10 @@
-# MultiAgentSystemsAgent SKILL
+---
+name: MultiAgentSystemsAgent
+description: Specialist in multi-agent systems. Evaluates the orchestration, workflow between agents, operational costs, and analysis pipeline resilience for the given requirement.
+tags: [multi-agent, orchestration, resilience, cost]
+---
 
-## Name
-MultiAgentSystemsAgent
-
-## Description
-Specialist in multi-agent systems. Evaluates the orchestration, workflow between agents, operational costs, and analysis pipeline resilience for the given requirement.
+# MultiAgentSystemsAgent Skill
 
 ## Role
 Evaluate multi-agent orchestration, costs, and resilience. Analyzes the execution flow between agents, identifies bottlenecks, latency and cost risks, and recommends optimizations such as retry limits, parallelization, and fallback strategies.
