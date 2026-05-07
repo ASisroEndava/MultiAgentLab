@@ -1,13 +1,13 @@
 {
   "caseId": "mock-01",
-  "title": "Caso 1 - Cambio simple de texto",
-  "description": "Caso simple donde el supervisor evita sobreejecutar agentes. Solo se invocan clarity y ux.",
+  "title": "Case 1 - Simple text change",
+  "description": "Simple case where the supervisor avoids over-executing agents. Only clarity and ux are invoked.",
   "expectedAgents": ["clarity", "ux"],
-  "expectedStatus": "verde",
+  "expectedStatus": "green",
   "request": {
     "storyId": "story-001",
-    "title": "Cambiar texto del boton",
-    "storyText": "Como usuario, quiero que el boton \"Guardar\" diga \"Confirmar\".",
+    "title": "Change button text",
+    "storyText": "As a user, I want the \"Save\" button to say \"Confirm\".",
     "provider": {
       "type": "ollama",
       "model": "qwen2.5:3b",

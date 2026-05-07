@@ -1,0 +1,23 @@
+{
+  "caseId": "mock-04",
+  "title": "Case 4 - Personal data download",
+  "description": "Shows the activation of the compliance agent and a higher severity output.",
+  "expectedAgents": ["clarity", "qa", "technical", "compliance"],
+  "expectedStatus": "red",
+  "request": {
+    "storyId": "story-004",
+    "title": "Download personal report",
+    "storyText": "As a customer, I want to download a report with all my personal data, transaction history, and attached documents from the last year. The report is generated in an undefined format and sent through an unspecified medium. There is no mention of authentication or identity verification for the download. It is not defined whether there is a size limit, what exact data is included, or how sensitive data such as card numbers or identity documents are handled. Retention and audit of downloads have not been defined either.",
+    "provider": {
+      "type": "ollama",
+      "model": "qwen2.5:3b",
+      "endpoint": "http://localhost:11434",
+      "temperature": 0.2
+    },
+    "logging": {
+      "level": "full",
+      "includePrompts": true,
+      "includeResponses": true
+    }
+  }
+}

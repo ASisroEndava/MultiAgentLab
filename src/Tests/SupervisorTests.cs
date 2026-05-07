@@ -14,8 +14,8 @@ public class SupervisorTests
         var request = new ReviewRequest
         {
             StoryId = "test-001",
-            Title = "Cambiar texto del boton",
-            StoryText = "Como usuario, quiero que el boton \"Guardar\" diga \"Confirmar\".",
+            Title = "Change button text",
+            StoryText = "As a user, I want the \"Save\" button to say \"Confirm\".",
             Provider = new ProviderSelection { Type = "ollama", Model = "llama3.1" }
         };
 
@@ -33,8 +33,8 @@ public class SupervisorTests
         var request = new ReviewRequest
         {
             StoryId = "test-003",
-            Title = "Reintentos automaticos",
-            StoryText = "Como sistema, necesito reintentar automaticamente el envio de notificaciones fallidas hasta 3 veces.",
+            Title = "Automatic retries",
+            StoryText = "As a system, I need to automatically retry sending failed notifications up to 3 times.",
             Provider = new ProviderSelection { Type = "ollama", Model = "llama3.1" }
         };
 
@@ -51,8 +51,8 @@ public class SupervisorTests
         var request = new ReviewRequest
         {
             StoryId = "test-004",
-            Title = "Descargar reporte personal",
-            StoryText = "Como cliente, quiero descargar un reporte con mis datos personales y transacciones del ultimo ano.",
+            Title = "Download personal report",
+            StoryText = "As a customer, I want to download a report with my personal data and transactions from the last year.",
             Provider = new ProviderSelection { Type = "ollama", Model = "llama3.1" }
         };
 
@@ -68,8 +68,8 @@ public class SupervisorTests
         var request = new ReviewRequest
         {
             StoryId = "test-002",
-            Title = "Resetear contrasena",
-            StoryText = "Como usuario, quiero poder resetear mi contrasena desde la pantalla de login para recuperar acceso.",
+            Title = "Reset password",
+            StoryText = "As a user, I want to be able to reset my password from the login screen to recover access.",
             Provider = new ProviderSelection { Type = "ollama", Model = "llama3.1" }
         };
 
@@ -89,15 +89,15 @@ public class SupervisorTests
             {
                 Agent = "ux",
                 Status = "ok",
-                Issues = new List<string> { "El feedback es lento" },
-                Recommendations = new List<string> { "Permitir edicion inline inmediata y simple" }
+                Issues = new List<string> { "The feedback is slow" },
+                Recommendations = new List<string> { "Allow immediate and simple inline editing" }
             },
             new AgentResult
             {
                 Agent = "technical",
                 Status = "ok",
-                Issues = new List<string> { "Cambiar direccion puede tener impacto en pedidos por estado del proceso" },
-                Recommendations = new List<string> { "Validar estado del pedido" }
+                Issues = new List<string> { "Changing the address may have an impact on orders due to process state" },
+                Recommendations = new List<string> { "Validate order state" }
             }
         };
 
@@ -116,7 +116,7 @@ public class SupervisorTests
             {
                 Agent = "clarity",
                 Status = "ok",
-                Issues = new List<string> { "Falta definicion de caso de error" }
+                Issues = new List<string> { "Missing error case definition" }
             }
         };
 
@@ -132,8 +132,8 @@ public class SupervisorTests
         var request = new ReviewRequest
         {
             StoryId = "test-001",
-            Title = "Cambiar texto del boton",
-            StoryText = "Como usuario, quiero que el boton \"Guardar\" diga \"Confirmar\".",
+            Title = "Change button text",
+            StoryText = "As a user, I want the \"Save\" button to say \"Confirm\".",
             Provider = new ProviderSelection { Type = "ollama", Model = "llama3.1" }
         };
 

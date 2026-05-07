@@ -1,0 +1,23 @@
+{
+  "caseId": "mock-03",
+  "title": "Case 3 - Automatic notification retries",
+  "description": "Backend story where UX does not participate. The technical agent is activated.",
+  "expectedAgents": ["clarity", "qa", "technical"],
+  "expectedStatus": "yellow",
+  "request": {
+    "storyId": "story-003",
+    "title": "Automatic retries",
+    "storyText": "As a system, I need to automatically retry sending failed notifications. The interval between retries is not specified, nor whether exponential backoff is used. It is unclear what type of notifications apply (email, push, SMS). It is not defined what happens after the last failed attempt or how the support team is alerted. There is also no mention of a queue limit or what happens if the volume of failed messages is very high.",
+    "provider": {
+      "type": "ollama",
+      "model": "qwen2.5:3b",
+      "endpoint": "http://localhost:11434",
+      "temperature": 0.1
+    },
+    "logging": {
+      "level": "full",
+      "includePrompts": true,
+      "includeResponses": true
+    }
+  }
+}

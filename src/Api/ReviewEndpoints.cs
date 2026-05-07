@@ -400,7 +400,7 @@ public static class ReviewEndpoints
     {
         var html = """
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -487,15 +487,15 @@ public static class ReviewEndpoints
     <div class="header">
         <div>
             <h1>MultiAgentLab Dashboard</h1>
-            <p>POC Multiagente - Revision de Historias de Usuario</p>
+            <p>Multi-Agent POC - User Story Review</p>
         </div>
     </div>
     <div class="tab-bar">
-        <div class="tab active" onclick="switchTab('run')">Ejecutar</div>
-        <div class="tab" onclick="switchTab('history')">Historial</div>
+        <div class="tab active" onclick="switchTab('run')">Execute</div>
+        <div class="tab" onclick="switchTab('history')">History</div>
     </div>
     <div class="container">
-        <!-- TAB: Ejecutar -->
+        <!-- TAB: Execute -->
         <div id="tab-run">
             <div class="section">
                 <h2>Mock Cases</h2>
@@ -503,7 +503,7 @@ public static class ReviewEndpoints
             </div>
             <div class="section" id="runResultSection" style="display:none;">
                 <div class="result-summary" id="resultSummary">
-                    <h3>Resultado</h3>
+                    <h3>Result</h3>
                     <div class="result-row" id="resultRow"></div>
                     <div class="agent-details" id="agentDetails"></div>
                 </div>
@@ -516,22 +516,22 @@ public static class ReviewEndpoints
             </div>
         </div>
 
-        <!-- TAB: Historial -->
+        <!-- TAB: History -->
         <div id="tab-history" class="hidden">
             <div class="section">
-                <h2>Buscar Ejecucion</h2>
+                <h2>Search Execution</h2>
                 <div class="lookup-bar">
-                    <input type="text" id="execIdInput" placeholder="Pegar execution ID, ej: exec-20260421-152532-4e23f21f" />
-                    <button class="lookup-btn" onclick="lookupExecution()">Ver Log</button>
+                    <input type="text" id="execIdInput" placeholder="Paste execution ID, e.g.: exec-20260421-152532-4e23f21f" />
+                    <button class="lookup-btn" onclick="lookupExecution()">View Log</button>
                 </div>
             </div>
             <div class="section">
-                <h2>Ejecuciones Anteriores</h2>
+                <h2>Previous Executions</h2>
                 <div id="execList"></div>
             </div>
             <div class="section" id="historyResultSection" style="display:none;">
                 <div class="result-summary" id="histResultSummary">
-                    <h3>Resultado</h3>
+                    <h3>Result</h3>
                     <div class="result-row" id="histResultRow"></div>
                     <div class="agent-details" id="histAgentDetails"></div>
                 </div>
@@ -568,8 +568,8 @@ async function loadMocks() {
             <h3>${c.title}</h3>
             <p>${c.description}</p>
             <div class="agents">${c.expectedAgents.map(a => `<span class="badge badge-agent">${a}</span>`).join('')}</div>
-            <div>Esperado: <span class="badge badge-status badge-${c.expectedStatus}">${c.expectedStatus}</span></div>
-            <button class="run-btn" onclick="runCase('${c.caseId}')">Ejecutar</button>
+            <div>Expected: <span class="badge badge-status badge-${c.expectedStatus}">${c.expectedStatus}</span></div>
+            <button class="run-btn" onclick="runCase('${c.caseId}')">Execute</button>
         `;
         grid.appendChild(card);
     });
@@ -579,11 +579,11 @@ async function runCase(caseId) {
     const card = document.getElementById(`card-${caseId}`);
     const btn = card.querySelector('.run-btn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span>Iniciando...';
+    btn.innerHTML = '<span class="spinner"></span>Starting...';
     card.classList.add('running');
     document.getElementById('runResultSection').style.display = 'block';
-    document.getElementById('logBody').innerHTML = '<span class="ev-supervisor">Iniciando ejecucion...</span>';
-    document.getElementById('logTitle').textContent = `Ejecutando ${caseId}...`;
+    document.getElementById('logBody').innerHTML = '<span class="ev-supervisor">Starting execution...</span>';
+    document.getElementById('logTitle').textContent = `Executing ${caseId}...`;
     document.getElementById('agentDetails').innerHTML = '';
     document.getElementById('resultRow').innerHTML = '';
 
@@ -609,7 +609,7 @@ async function runCase(caseId) {
         document.getElementById('logBody').innerHTML = `<span class="ev-agent-fail">Error: ${e.message}</span>`;
     } finally {
         btn.disabled = false;
-        btn.textContent = 'Ejecutar';
+        btn.textContent = 'Execute';
         card.classList.remove('running');
     }
 }
@@ -623,9 +623,9 @@ function renderLiveProgress(logs) {
 
     if (selectedEvt) {
         html += `<div style="margin-bottom:1rem;">`;
-        html += `<span class="ev-selection" style="font-weight:bold;">Agentes seleccionados:</span> ${invoked.map(a => `<span class="badge badge-agent" style="margin-left:4px;">${a}</span>`).join(' ')}`;
+        html += `<span class="ev-selection" style="font-weight:bold;">Selected agents:</span> ${invoked.map(a => `<span class="badge badge-agent" style="margin-left:4px;">${a}</span>`).join(' ')}`;
         if (skipped.length > 0) {
-            html += `<br/><span style="color:#64748b;font-size:0.8rem;">Omitidos: ${skipped.map(s => s.agent).join(', ')}</span>`;
+            html += `<br/><span style="color:#64748b;font-size:0.8rem;">Skipped: ${skipped.map(s => s.agent).join(', ')}</span>`;
         }
         html += `</div>`;
     }
@@ -642,187 +642,187 @@ function renderLiveProgress(logs) {
     });
 
     const statusLabels = {
-        'running': ['Iniciando...', '#60a5fa', true],
-        'waiting_llm': ['Esperando LLM...', '#a78bfa', true],
-        'processing': ['Procesando respuesta...', '#22d3ee', true],
-        'done': ['Completado', '#4ade80', false],
+        'running': ['Starting...', '#60a5fa', true],
+        'waiting_llm': ['Waiting for LLM...', '#a78bfa', true],
+        'processing': ['Processing response...', '#22d3ee', true],
+        'done': ['Completed', '#4ade80', false],
         'failed': ['Error', '#f87171', false]
     };
 
-    invoked.forEach(name => {
-        const state = agentStates[name];
-        if (!state) {
-            html += `<div style="padding:0.5rem 0;border-bottom:1px solid #1e293b;color:#475569;">
-                <span style="font-weight:bold;">${name.toUpperCase()}</span> — Pendiente</div>`;
-            return;
-        }
-        const [label, color, spinning] = statusLabels[state.status] || ['?', '#94a3b8', false];
-        html += `<div style="padding:0.5rem 0;border-bottom:1px solid #1e293b;">
-            <span style="font-weight:bold;color:${color};">`;
-        if (spinning) html += `<span class="spinner"></span>`;
-        else html += state.status === 'done' ? '&#10003; ' : '&#10007; ';
-        html += `${name.toUpperCase()}</span> <span style="color:${color};font-size:0.85rem;">${label}</span>`;
-        if (state.status === 'done') html += ` <span class="badge badge-agent">score: ${state.score}</span> <span style="color:#94a3b8;font-size:0.8rem;">${state.issues} issues</span>`;
-        if (state.status === 'failed') html += ` <span style="color:#f87171;font-size:0.8rem;">${state.error || ''}</span>`;
-        html += `</div>`;
-    });
-
-    const finalEvt = logs.find(l => l.eventType === 'final_result_generated');
-    if (finalEvt) {
-        html += `<div style="margin-top:1rem;padding-top:0.75rem;border-top:2px solid #334155;">
-            <span class="ev-result">★ RESULTADO FINAL: </span>
-            <span class="badge badge-status badge-${finalEvt.data.status}" style="font-size:0.85rem;">${finalEvt.data.status?.toUpperCase()}</span>
-        </div>`;
-    }
-
-    body.innerHTML = html;
-}
-
-function buildResultFromLogs(executionId, logs, rowId, detailsId) {
-    const selectedEvt = logs.find(l => l.eventType === 'selected_agents');
-    const finalEvt = logs.find(l => l.eventType === 'final_result_generated');
-    const agentCompleted = logs.filter(l => l.eventType === 'agent_completed' || l.eventType === 'agent_failed');
-    const agentResponses = logs.filter(l => l.eventType === 'agent_response_received');
-    const reqEvt = logs.find(l => l.eventType === 'request_received');
-
-    const promptEvts = logs.filter(l => l.eventType === 'agent_prompt_sent');
-    const storyText = reqEvt?.data?.storyText || (promptEvts.length > 0 ? '(ver prompt en log)' : '');
-    const conflictEvts = logs.filter(l => l.eventType === 'conflict_detected');
-    const resolutionEvts = logs.filter(l => l.eventType === 'supervisor_resolution');
-    const conflicts = conflictEvts.flatMap(e => e.data?.conflicts || []);
-    const resolutions = resolutionEvts.flatMap(e => e.data?.resolution || []);
-
-    const r = {
-        executionId,
-        status: finalEvt?.data?.status || 'unknown',
-        invokedAgents: selectedEvt?.data?.invoked || [],
-        skippedAgents: selectedEvt?.data?.skipped || [],
-        issues: [], conflicts: conflicts, resolutions: resolutions,
-        provider: reqEvt?.data?.provider || '?',
-        model: reqEvt?.data?.model || '?',
-        title: reqEvt?.data?.title || '?',
-        storyText: storyText,
-        agentResults: agentCompleted.map(ac => {
-            const agentName = ac.data?.agent || '?';
-            const resp = agentResponses.find(r => r.data?.agent === agentName);
-            let parsed = {};
-            if (resp?.data?.response) {
-                try { const t = resp.data.response; const s = t.indexOf('{'); const e = t.lastIndexOf('}'); if (s>=0 && e>s) parsed = JSON.parse(t.substring(s, e+1)); } catch(_){}
+        invoked.forEach(name => {
+            const state = agentStates[name];
+            if (!state) {
+                html += `<div style="padding:0.5rem 0;border-bottom:1px solid #1e293b;color:#475569;">
+                    <span style="font-weight:bold;">${name.toUpperCase()}</span> — Pending</div>`;
+                return;
             }
-            return {
-                agent: agentName,
-                status: ac.data?.status || (ac.eventType === 'agent_failed' ? 'error' : 'ok'),
-                score: ac.data?.score || 0,
-                issues: parsed.issues?.map(i => typeof i === 'string' ? i : (i.description || JSON.stringify(i))) || [],
-                recommendations: parsed.recommendations?.map(r => typeof r === 'string' ? r : (r.description || JSON.stringify(r))) || [],
-                questions: parsed.questions?.map(q => typeof q === 'string' ? q : (q.description || JSON.stringify(q))) || [],
-                rawSummary: parsed.rawSummary || null
-            };
-        })
-    };
-    showResult(r, rowId, detailsId);
-}
+            const [label, color, spinning] = statusLabels[state.status] || ['?', '#94a3b8', false];
+            html += `<div style="padding:0.5rem 0;border-bottom:1px solid #1e293b;">
+                <span style="font-weight:bold;color:${color};">`;
+            if (spinning) html += `<span class="spinner"></span>`;
+            else html += state.status === 'done' ? '&#10003; ' : '&#10007; ';
+            html += `${name.toUpperCase()}</span> <span style="color:${color};font-size:0.85rem;">${label}</span>`;
+            if (state.status === 'done') html += ` <span class="badge badge-agent">score: ${state.score}</span> <span style="color:#94a3b8;font-size:0.8rem;">${state.issues} issues</span>`;
+            if (state.status === 'failed') html += ` <span style="color:#f87171;font-size:0.8rem;">${state.error || ''}</span>`;
+            html += `</div>`;
+        });
 
-function showResult(r, rowId, detailsId) {
-    let storyHtml = '';
-    if (r.storyText) {
-        storyHtml = `<div style="background:#0f172a;border:1px solid #334155;border-radius:0.5rem;padding:1rem;margin-bottom:1rem;">
-            <div style="font-size:0.75rem;color:#64748b;text-transform:uppercase;margin-bottom:0.5rem;">Requerimiento enviado</div>
-            ${r.title ? `<div style="font-weight:bold;color:#f1f5f9;margin-bottom:0.5rem;">${escHtml(r.title)}</div>` : ''}
-            <div style="font-size:0.85rem;color:#cbd5e1;line-height:1.6;white-space:pre-wrap;">${escHtml(r.storyText)}</div>
-        </div>`;
+        const finalEvt = logs.find(l => l.eventType === 'final_result_generated');
+        if (finalEvt) {
+            html += `<div style="margin-top:1rem;padding-top:0.75rem;border-top:2px solid #334155;">
+                <span class="ev-result">★ FINAL RESULT: </span>
+                <span class="badge badge-status badge-${finalEvt.data.status}" style="font-size:0.85rem;">${finalEvt.data.status?.toUpperCase()}</span>
+            </div>`;
+        }
+
+        body.innerHTML = html;
     }
-    document.getElementById(rowId).innerHTML = storyHtml + `
-        <div class="result-item"><label>Status</label><span class="badge badge-status badge-${r.status}">${r.status.toUpperCase()}</span></div>
-        <div class="result-item"><label>Agentes invocados</label><span>${r.invokedAgents.join(', ')}</span></div>
-        <div class="result-item"><label>Omitidos</label><span>${r.skippedAgents.map(s => s.agent).join(', ') || 'ninguno'}</span></div>
-        <div class="result-item"><label>Issues</label><span>${r.issues.length}</span></div>
-        <div class="result-item"><label>Conflictos</label><span>${r.conflicts.length}</span></div>
-        <div class="result-item"><label>Modelo</label><span>${r.provider} / ${r.model}</span></div>
-        <div class="result-item"><label>Execution ID</label><span class="mono">${r.executionId}</span></div>
-    `;
-    const details = document.getElementById(detailsId);
-    details.innerHTML = '';
-    if (r.agentResults && r.agentResults.length > 0) {
-        r.agentResults.forEach(a => {
-            const statusIcon = a.status === 'ok' ? '&#10003;' : (a.status === 'parse_error' ? '⚠' : '&#10007;');
-            const statusColor = a.status === 'ok' ? '#4ade80' : (a.status === 'parse_error' ? '#fb923c' : '#f87171');
-            const statusLabel = a.status === 'parse_error' ? ' <span style="color:#fb923c;font-size:0.7rem;">(parse error)</span>' : '';
-            details.innerHTML += `
-                <div class="agent-card"${a.status === 'parse_error' ? ' style="border-color:#fb923c40;"' : ''}>
-                    <h4><span style="color:${statusColor}">${statusIcon}</span> ${a.agent.toUpperCase()} <span class="badge badge-agent">score: ${a.score}</span>${statusLabel}</h4>
-                    ${a.status === 'parse_error' ? `<div style="margin-bottom:0.5rem;padding:0.5rem;background:#7f1d1d20;border-radius:0.25rem;"><strong style="color:#fb923c;font-size:0.8rem;">El modelo no devolvio JSON valido.</strong><div style="font-size:0.75rem;color:#94a3b8;margin-top:0.25rem;">Ver el log completo para inspeccionar la respuesta raw del LLM.</div></div>` : ''}
-                    ${a.issues.length > 0 ? `<div style="margin-bottom:0.5rem;"><strong style="color:#f87171;font-size:0.8rem;">Issues:</strong><ul class="detail-list">${a.issues.map(i => `<li>${escHtml(i)}</li>`).join('')}</ul></div>` : ''}
-                    ${a.recommendations.length > 0 ? `<div style="margin-bottom:0.5rem;"><strong style="color:#60a5fa;font-size:0.8rem;">Recomendaciones:</strong><ul class="detail-list">${a.recommendations.map(r => `<li>${escHtml(r)}</li>`).join('')}</ul></div>` : ''}
-                    ${a.questions && a.questions.length > 0 ? `<div><strong style="color:#facc15;font-size:0.8rem;">Preguntas:</strong><ul class="detail-list">${a.questions.map(q => `<li>${escHtml(q)}</li>`).join('')}</ul></div>` : ''}
-                    ${a.rawSummary ? `<div style="margin-top:0.5rem;font-size:0.75rem;color:#64748b;">Summary: ${escHtml(a.rawSummary).substring(0, 300)}${a.rawSummary.length > 300 ? '...' : ''}</div>` : ''}
-                </div>
-            `;
-        });
+
+    function buildResultFromLogs(executionId, logs, rowId, detailsId) {
+        const selectedEvt = logs.find(l => l.eventType === 'selected_agents');
+        const finalEvt = logs.find(l => l.eventType === 'final_result_generated');
+        const agentCompleted = logs.filter(l => l.eventType === 'agent_completed' || l.eventType === 'agent_failed');
+        const agentResponses = logs.filter(l => l.eventType === 'agent_response_received');
+        const reqEvt = logs.find(l => l.eventType === 'request_received');
+
+        const promptEvts = logs.filter(l => l.eventType === 'agent_prompt_sent');
+        const storyText = reqEvt?.data?.storyText || (promptEvts.length > 0 ? '(see prompt in log)' : '');
+        const conflictEvts = logs.filter(l => l.eventType === 'conflict_detected');
+        const resolutionEvts = logs.filter(l => l.eventType === 'supervisor_resolution');
+        const conflicts = conflictEvts.flatMap(e => e.data?.conflicts || []);
+        const resolutions = resolutionEvts.flatMap(e => e.data?.resolution || []);
+
+        const r = {
+            executionId,
+            status: finalEvt?.data?.status || 'unknown',
+            invokedAgents: selectedEvt?.data?.invoked || [],
+            skippedAgents: selectedEvt?.data?.skipped || [],
+            issues: [], conflicts: conflicts, resolutions: resolutions,
+            provider: reqEvt?.data?.provider || '?',
+            model: reqEvt?.data?.model || '?',
+            title: reqEvt?.data?.title || '?',
+            storyText: storyText,
+            agentResults: agentCompleted.map(ac => {
+                const agentName = ac.data?.agent || '?';
+                const resp = agentResponses.find(r => r.data?.agent === agentName);
+                let parsed = {};
+                if (resp?.data?.response) {
+                    try { const t = resp.data.response; const s = t.indexOf('{'); const e = t.lastIndexOf('}'); if (s>=0 && e>s) parsed = JSON.parse(t.substring(s, e+1)); } catch(_){}
+                }
+                return {
+                    agent: agentName,
+                    status: ac.data?.status || (ac.eventType === 'agent_failed' ? 'error' : 'ok'),
+                    score: ac.data?.score || 0,
+                    issues: parsed.issues?.map(i => typeof i === 'string' ? i : (i.description || JSON.stringify(i))) || [],
+                    recommendations: parsed.recommendations?.map(r => typeof r === 'string' ? r : (r.description || JSON.stringify(r))) || [],
+                    questions: parsed.questions?.map(q => typeof q === 'string' ? q : (q.description || JSON.stringify(q))) || [],
+                    rawSummary: parsed.rawSummary || null
+                };
+            })
+        };
+        showResult(r, rowId, detailsId);
     }
-    if (r.conflicts && r.conflicts.length > 0) {
-        let supHtml = `<div style="margin-top:1.5rem;background:#1a1a2e;border:1px solid #fb923c40;border-radius:0.75rem;padding:1.25rem;">`;
-        supHtml += `<h3 style="margin:0 0 1rem 0;font-size:1.1rem;color:#fb923c;">\u26a1 Intervencion del Supervisor</h3>`;
-        supHtml += `<div style="margin-bottom:1rem;"><div style="font-size:0.75rem;color:#94a3b8;text-transform:uppercase;margin-bottom:0.5rem;">Conflictos detectados</div>`;
-        r.conflicts.forEach(c => {
-            supHtml += `<div style="padding:0.5rem 0.75rem;margin-bottom:0.5rem;background:#7f1d1d20;border-left:3px solid #f87171;border-radius:0.25rem;color:#fca5a5;font-size:0.85rem;">${escHtml(c)}</div>`;
-        });
-        supHtml += `</div>`;
-        if (r.resolutions && r.resolutions.length > 0) {
-            supHtml += `<div><div style="font-size:0.75rem;color:#94a3b8;text-transform:uppercase;margin-bottom:0.5rem;">Resoluciones del supervisor</div>`;
-            r.resolutions.forEach(res => {
-                supHtml += `<div style="padding:0.5rem 0.75rem;margin-bottom:0.5rem;background:#16532520;border-left:3px solid #4ade80;border-radius:0.25rem;color:#86efac;font-size:0.85rem;">${escHtml(res)}</div>`;
+
+    function showResult(r, rowId, detailsId) {
+        let storyHtml = '';
+        if (r.storyText) {
+            storyHtml = `<div style="background:#0f172a;border:1px solid #334155;border-radius:0.5rem;padding:1rem;margin-bottom:1rem;">
+                <div style="font-size:0.75rem;color:#64748b;text-transform:uppercase;margin-bottom:0.5rem;">Request sent</div>
+                ${r.title ? `<div style="font-weight:bold;color:#f1f5f9;margin-bottom:0.5rem;">${escHtml(r.title)}</div>` : ''}
+                <div style="font-size:0.85rem;color:#cbd5e1;line-height:1.6;white-space:pre-wrap;">${escHtml(r.storyText)}</div>
+            </div>`;
+        }
+        document.getElementById(rowId).innerHTML = storyHtml + `
+            <div class="result-item"><label>Status</label><span class="badge badge-status badge-${r.status}">${r.status.toUpperCase()}</span></div>
+            <div class="result-item"><label>Agents invoked</label><span>${r.invokedAgents.join(', ')}</span></div>
+            <div class="result-item"><label>Skipped agents</label><span>${r.skippedAgents.map(s => s.agent).join(', ') || 'none'}</span></div>
+            <div class="result-item"><label>Issues</label><span>${r.issues.length}</span></div>
+            <div class="result-item"><label>Conflicts</label><span>${r.conflicts.length}</span></div>
+            <div class="result-item"><label>Model</label><span>${r.provider} / ${r.model}</span></div>
+            <div class="result-item"><label>Execution ID</label><span class="mono">${r.executionId}</span></div>
+        `;
+        const details = document.getElementById(detailsId);
+        details.innerHTML = '';
+        if (r.agentResults && r.agentResults.length > 0) {
+            r.agentResults.forEach(a => {
+                const statusIcon = a.status === 'ok' ? '&#10003;' : (a.status === 'parse_error' ? '⚠' : '&#10007;');
+                const statusColor = a.status === 'ok' ? '#4ade80' : (a.status === 'parse_error' ? '#fb923c' : '#f87171');
+                const statusLabel = a.status === 'parse_error' ? ' <span style="color:#fb923c;font-size:0.7rem;">(parse error)</span>' : '';
+                details.innerHTML += `
+                    <div class="agent-card"${a.status === 'parse_error' ? ' style="border-color:#fb923c40;"' : ''}>
+                        <h4><span style="color:${statusColor}">${statusIcon}</span> ${a.agent.toUpperCase()} <span class="badge badge-agent">score: ${a.score}</span>${statusLabel}</h4>
+                        ${a.status === 'parse_error' ? `<div style="margin-bottom:0.5rem;padding:0.5rem;background:#7f1d1d20;border-radius:0.25rem;"><strong style="color:#fb923c;font-size:0.8rem;">The model did not return valid JSON.</strong><div style="font-size:0.75rem;color:#94a3b8;margin-top:0.25rem;">See the full log to inspect the LLM's raw response.</div></div>` : ''}
+                        ${a.issues.length > 0 ? `<div style="margin-bottom:0.5rem;"><strong style="color:#f87171;font-size:0.8rem;">Issues:</strong><ul class="detail-list">${a.issues.map(i => `<li>${escHtml(i)}</li>`).join('')}</ul></div>` : ''}
+                        ${a.recommendations.length > 0 ? `<div style="margin-bottom:0.5rem;"><strong style="color:#60a5fa;font-size:0.8rem;">Recommendations:</strong><ul class="detail-list">${a.recommendations.map(r => `<li>${escHtml(r)}</li>`).join('')}</ul></div>` : ''}
+                        ${a.questions && a.questions.length > 0 ? `<div><strong style="color:#facc15;font-size:0.8rem;">Questions:</strong><ul class="detail-list">${a.questions.map(q => `<li>${escHtml(q)}</li>`).join('')}</ul></div>` : ''}
+                        ${a.rawSummary ? `<div style="margin-top:0.5rem;font-size:0.75rem;color:#64748b;">Summary: ${escHtml(a.rawSummary).substring(0, 300)}${a.rawSummary.length > 300 ? '...' : ''}</div>` : ''}
+                    </div>
+                `;
+            });
+        }
+        if (r.conflicts && r.conflicts.length > 0) {
+            let supHtml = `<div style="margin-top:1.5rem;background:#1a1a2e;border:1px solid #fb923c40;border-radius:0.75rem;padding:1.25rem;">`;
+            supHtml += `<h3 style="margin:0 0 1rem 0;font-size:1.1rem;color:#fb923c;">\u26a1 Supervisor Intervention</h3>`;
+            supHtml += `<div style="margin-bottom:1rem;"><div style="font-size:0.75rem;color:#94a3b8;text-transform:uppercase;margin-bottom:0.5rem;">Conflicts detected</div>`;
+            r.conflicts.forEach(c => {
+                supHtml += `<div style="padding:0.5rem 0.75rem;margin-bottom:0.5rem;background:#7f1d1d20;border-left:3px solid #f87171;border-radius:0.25rem;color:#fca5a5;font-size:0.85rem;">${escHtml(c)}</div>`;
             });
             supHtml += `</div>`;
+            if (r.resolutions && r.resolutions.length > 0) {
+                supHtml += `<div><div style="font-size:0.75rem;color:#94a3b8;text-transform:uppercase;margin-bottom:0.5rem;">Supervisor resolutions</div>`;
+                r.resolutions.forEach(res => {
+                    supHtml += `<div style="padding:0.5rem 0.75rem;margin-bottom:0.5rem;background:#16532520;border-left:3px solid #4ade80;border-radius:0.25rem;color:#86efac;font-size:0.85rem;">${escHtml(res)}</div>`;
+                });
+                supHtml += `</div>`;
+            }
+            supHtml += `</div>`;
+            details.innerHTML += supHtml;
         }
-        supHtml += `</div>`;
-        details.innerHTML += supHtml;
     }
-}
 
-function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-async function loadLog(executionId, titleId, bodyId) {
-    document.getElementById(titleId).textContent = `Log: ${executionId}`;
-    const res = await fetch(`${BASE}/executions/${executionId}/log/text`);
-    const text = await res.text();
-    const highlighted = text
-        .replace(/(▶ REQUEST RECEIVED)/g, '<span class="ev-request">$1</span>')
-        .replace(/(⚙ SUPERVISOR STARTED)/g, '<span class="ev-supervisor">$1</span>')
-        .replace(/(🎯 AGENT SELECTION)/g, '<span class="ev-selection">$1</span>')
-        .replace(/(┌─ AGENT \[.*?\] STARTED)/g, '<span class="ev-agent-start">$1</span>')
-        .replace(/(PROMPT SENT[^:]*:)/g, '<span class="ev-supervisor">$1</span>')
-        .replace(/(LLM RESPONSE[^:]*:)/g, '<span class="ev-agent-ok">$1</span>')
-        .replace(/(┊\s*[┌└]─+)/g, '<span class="ev-box">$1</span>')
-        .replace(/(┊\s*│.*)/g, '<span class="ev-prompt">$1</span>')
-        .replace(/(└─ AGENT \[.*?\] COMPLETED.*)/g, '<span class="ev-agent-ok">$1</span>')
-        .replace(/(└─ AGENT \[.*?\] FAILED.*)/g, '<span class="ev-agent-fail">$1</span>')
-        .replace(/(⚡ CONFLICTS DETECTED)/g, '<span class="ev-conflict">$1</span>')
-        .replace(/(✔ SUPERVISOR RESOLUTION)/g, '<span class="ev-conflict">$1</span>')
-        .replace(/(★ FINAL RESULT)/g, '<span class="ev-result">$1</span>')
-        .replace(/(■ COMPLETED.*)/g, '<span class="ev-done">$1</span>')
-        .replace(/(\[\d{2}:\d{2}:\d{2}\.\d{3}\])/g, '<span class="ev-time">$1</span>');
-    document.getElementById(bodyId).innerHTML = highlighted;
-}
-
-async function loadExecutions() {
-    const res = await fetch(`${BASE}/executions`);
-    const execs = await res.json();
-    const container = document.getElementById('execList');
-    if (execs.length === 0) {
-        container.innerHTML = '<div class="empty-state">No hay ejecuciones anteriores</div>';
-        return;
+    async function loadLog(executionId, titleId, bodyId) {
+        document.getElementById(titleId).textContent = `Log: ${executionId}`;
+        const res = await fetch(`${BASE}/executions/${executionId}/log/text`);
+        const text = await res.text();
+        const highlighted = text
+            .replace(/(▶ REQUEST RECEIVED)/g, '<span class="ev-request">$1</span>')
+            .replace(/(⚙ SUPERVISOR STARTED)/g, '<span class="ev-supervisor">$1</span>')
+            .replace(/(🎯 AGENT SELECTION)/g, '<span class="ev-selection">$1</span>')
+            .replace(/(┌─ AGENT \[.*?\] STARTED)/g, '<span class="ev-agent-start">$1</span>')
+            .replace(/(PROMPT SENT[^:]*:)/g, '<span class="ev-supervisor">$1</span>')
+            .replace(/(LLM RESPONSE[^:]*:)/g, '<span class="ev-agent-ok">$1</span>')
+            .replace(/(┊\s*[┌└]─+)/g, '<span class="ev-box">$1</span>')
+            .replace(/(┊\s*│.*)/g, '<span class="ev-prompt">$1</span>')
+            .replace(/(└─ AGENT \[.*?\] COMPLETED.*)/g, '<span class="ev-agent-ok">$1</span>')
+            .replace(/(└─ AGENT \[.*?\] FAILED.*)/g, '<span class="ev-agent-fail">$1</span>')
+            .replace(/(⚡ CONFLICTS DETECTED)/g, '<span class="ev-conflict">$1</span>')
+            .replace(/(✔ SUPERVISOR RESOLUTION)/g, '<span class="ev-conflict">$1</span>')
+            .replace(/(★ FINAL RESULT)/g, '<span class="ev-result">$1</span>')
+            .replace(/(■ COMPLETED.*)/g, '<span class="ev-done">$1</span>')
+            .replace(/(\[\d{2}:\d{2}:\d{2}\.\d{3}\])/g, '<span class="ev-time">$1</span>');
+        document.getElementById(bodyId).innerHTML = highlighted;
     }
-    let html = '<table class="exec-table"><thead><tr><th>Execution ID</th><th>Historia</th><th>Status</th><th>Tiempo</th><th>Eventos</th></tr></thead><tbody>';
-    execs.forEach(e => {
-        const secs = (e.totalMs / 1000).toFixed(1);
-        html += `<tr onclick="viewExecution('${e.executionId}', this)">
-            <td class="mono">${e.executionId}</td>
-            <td>${e.title || e.storyId || '-'}</td>
-            <td><span class="badge badge-status badge-${e.status}">${e.status}</span></td>
-            <td>${secs}s</td>
-            <td>${e.eventCount}</td>
-        </tr>`;
+
+    async function loadExecutions() {
+        const res = await fetch(`${BASE}/executions`);
+        const execs = await res.json();
+        const container = document.getElementById('execList');
+        if (execs.length === 0) {
+            container.innerHTML = '<div class="empty-state">No previous executions</div>';
+            return;
+        }
+        let html = '<table class="exec-table"><thead><tr><th>Execution ID</th><th>Story</th><th>Status</th><th>Time</th><th>Events</th></tr></thead><tbody>';
+        execs.forEach(e => {
+            const secs = (e.totalMs / 1000).toFixed(1);
+            html += `<tr onclick="viewExecution('${e.executionId}', this)">
+                <td class="mono">${e.executionId}</td>
+                <td>${e.title || e.storyId || '-'}</td>
+                <td><span class="badge badge-status badge-${e.status}">${e.status}</span></td>
+                <td>${secs}s</td>
+                <td>${e.eventCount}</td>
+            </tr>`;
     });
     html += '</tbody></table>';
     container.innerHTML = html;
@@ -835,7 +835,7 @@ async function viewExecution(executionId, row) {
     }
     document.getElementById('execIdInput').value = executionId;
     document.getElementById('historyResultSection').style.display = 'block';
-    document.getElementById('histLogBody').innerHTML = '<span class="ev-supervisor">Cargando...</span>';
+    document.getElementById('histLogBody').innerHTML = '<span class="ev-supervisor">Loading...</span>';
 
     const logsRes = await fetch(`${BASE}/executions/${executionId}/log`);
     const logs = await logsRes.json();

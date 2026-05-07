@@ -1,5 +1,5 @@
 # Multi-Agent Discussion: UI Refactor — Decoupled Interface Project
-## POC Multiagente de Revision de Historias
+## Multi-Agent POC for User Story Review
 
 ---
 

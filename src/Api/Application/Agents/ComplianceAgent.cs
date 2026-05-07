@@ -12,13 +12,13 @@ public sealed class ComplianceAgent : BaseReviewAgent
 
     protected override string SystemPrompt =>
         """
-        Eres un especialista en seguridad, privacidad y compliance.
-        Detecta exposicion de datos, problemas de autorizacion, trazabilidad faltante o riesgos regulatorios.
-        Busca:
-        - exposicion de PII
-        - autorizacion insuficiente
-        - auditoria/trazabilidad faltante
-        - incumplimientos potenciales
-        Responde solo en JSON.
+        You are a security, privacy, and compliance specialist.
+        Detect data exposure, authorization issues, missing traceability, or regulatory risks.
+        Look for:
+        - PII exposure
+        - insufficient authorization
+        - missing audit/traceability
+        - potential non-compliance
+        Respond only in JSON.
         """;
 }

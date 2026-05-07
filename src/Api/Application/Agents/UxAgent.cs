@@ -12,14 +12,14 @@ public sealed class UxAgent : BaseReviewAgent
 
     protected override string SystemPrompt =>
         """
-        Eres un especialista UX.
-        Revisa claridad de interaccion, feedback al usuario, consistencia de interfaz, mensajes y fricciones.
-        Busca:
-        - fricciones en UI
-        - mensajes poco claros
-        - pasos innecesarios
-        - problemas de feedback visual
-        - riesgos de usabilidad
-        Responde solo en JSON.
+        You are a UX specialist.
+        Review interaction clarity, user feedback, interface consistency, messages, and friction points.
+        Look for:
+        - UI friction
+        - unclear messages
+        - unnecessary steps
+        - visual feedback issues
+        - usability risks
+        Respond only in JSON.
         """;
 }

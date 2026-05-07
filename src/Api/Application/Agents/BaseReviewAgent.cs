@@ -52,12 +52,12 @@ public abstract class BaseReviewAgent : IReviewAgent
         return $$"""
                 {{SystemPrompt}}
 
-                --- Historia a revisar ---
-                Titulo: {{context.Title}}
+                --- Story to review ---
+                Title: {{context.Title}}
                 ID: {{context.StoryId}}
-                Texto: {{context.StoryText}}
+                Text: {{context.StoryText}}
 
-                Responde exclusivamente en JSON con esta forma:
+                Respond exclusively in JSON with this format:
                 {
                   "issues": [],
                   "recommendations": [],
@@ -73,7 +73,7 @@ public abstract class BaseReviewAgent : IReviewAgent
         {
             var jsonStart = responseText.IndexOf('{');
             var jsonEnd = responseText.LastIndexOf('}');
-
+// 
             if (jsonStart >= 0 && jsonEnd > jsonStart)
             {
                 var jsonStr = responseText[jsonStart..(jsonEnd + 1)];
@@ -111,7 +111,7 @@ public abstract class BaseReviewAgent : IReviewAgent
             Agent = Name,
             Status = "parse_error",
             Score = 0,
-            Issues = new List<string> { "No se pudo parsear la respuesta del modelo" },
+            Issues = new List<string> { "Could not parse the model response" },
             Recommendations = new(),
             Questions = new(),
             RawSummary = responseText

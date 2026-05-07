@@ -1,8 +1,8 @@
 # Angular UI Design — Decoupled Interface Project
-## MultiAgentLab POC · Revision de Historias de Usuario
+## MultiAgentLab POC · User Story Review
 
 > Framework decision: **Angular 17+ (standalone components, Signals, RxJS)**
-> Adapted from `06_Discusion_Refactor_UI_Desacoplada.md` replacing the React/Vite proposal.
+> Adapted from `06_Discussion_Decoupled_UI_Refactor.md` replacing the React/Vite proposal.
 
 ---
 
@@ -153,7 +153,7 @@ MultiAgentLab/                      ← monorepo root
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  MultiAgentLab  ·  POC — Revisión de Historias        ● Polling: Connected  │
+│  MultiAgentLab  ·  POC — Story Review                 ● Polling: Connected  │
 ├────────────────────┬──────────────────────┬────────────────────────────────-┤
 │  STORY INPUT       │  AGENT DECISIONS      │  EVENT TIMELINE                 │
 │                    │                       │                                 │
@@ -170,7 +170,7 @@ MultiAgentLab/                      ← monorepo root
 ├────────────────────┴──────────────────────┴─────────────────────────────────┤
 │  FINAL RESULT                                                    [● VERDE ]  │
 │                                                                              │
-│  Summary: Historia simple y clara, sin impacto técnico relevante.            │
+│  Summary: Simple and clear story, no relevant technical impact.              │
 │  Issues (0)  ·  Recommendations (1)  ·  Agents: clarity, ux                │
 │  ▶ Agent Details                                                             │
 └──────────────────────────────────────────────────────────────────────────────┘

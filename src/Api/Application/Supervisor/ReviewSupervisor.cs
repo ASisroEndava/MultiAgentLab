@@ -67,7 +67,7 @@ public sealed class ReviewSupervisor
                     {
                         Agent = agent.Name,
                         Status = "error",
-                        Issues = new List<string> { $"Error al ejecutar agente: {ex.Message}" },
+                        Issues = new List<string> { $"Error executing agent: {ex.Message}" },
                         RawSummary = ex.Message
                     };
                 }
@@ -137,18 +137,18 @@ public sealed class ReviewSupervisor
         var parts = new List<string>();
 
         if (totalIssues == 0)
-            parts.Add("La historia parece completa y bien definida.");
+            parts.Add("The story appears complete and well-defined.");
         else if (totalIssues <= 2)
-            parts.Add("La historia es comprensible pero tiene observaciones menores.");
+            parts.Add("The story is understandable but has minor observations.");
         else if (totalIssues <= 5)
-            parts.Add("La historia tiene definiciones faltantes que conviene completar.");
+            parts.Add("The story has missing definitions that should be completed.");
         else
-            parts.Add("La historia esta incompleta y requiere revision significativa.");
+            parts.Add("The story is incomplete and requires significant review.");
 
         if (conflicts.Count > 0)
-            parts.Add($"Se detectaron {conflicts.Count} tension(es) entre agentes que fueron resueltas por el supervisor.");
+            parts.Add($"{conflicts.Count} tension(s) between agents were detected and resolved by the supervisor.");
 
-        parts.Add($"{okCount} de {results.Count} agentes completaron su revision exitosamente.");
+        parts.Add($"{okCount} of {results.Count} agents completed their review successfully.");
 
         return string.Join(" ", parts);
     }
