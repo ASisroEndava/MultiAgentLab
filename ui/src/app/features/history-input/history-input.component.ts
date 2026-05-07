@@ -58,7 +58,8 @@ export class HistoryInputComponent implements OnInit {
   }
 
   protected get canSubmit(): boolean {
-    return !!this.storyText() && !this.submitting() && !this.state.isExecuting();
+    const ready = !!this.selectedMockCase() || !!this.storyText();
+    return ready && !this.submitting() && !this.state.isExecuting();
   }
 
   protected get availableModels(): string[] {
@@ -110,10 +111,10 @@ export class HistoryInputComponent implements OnInit {
         },
       };
 
-      this.api.reviewStory(req).subscribe({
-        next: (result) => {
+      this.api.startReviewStory(req).subscribe({
+        next: (res) => {
           this.submitting.set(false);
-          this.executionStarted.emit({ type: 'sync', result });
+          this.executionStarted.emit({ type: 'async', executionId: res.executionId });
         },
         error: (err) => {
           this.submitting.set(false);

@@ -9,19 +9,45 @@
   </span>
 </mat-toolbar>
 
-<div class="panels-row">
+<div class="main-layout">
   <div class="panel-input">
     <app-history-input (executionStarted)="onExecutionStarted($event)" />
   </div>
-  <div class="panel-decision">
-    <app-decision-panel />
-  </div>
-  <div class="panel-timeline">
-    <app-event-timeline />
-  </div>
-</div>
 
-<div class="panel-result">
-  <app-final-result />
+  <mat-tab-group class="main-tabs"
+    [selectedIndex]="activeTab()"
+    (selectedIndexChange)="activeTab.set($event)"
+    animationDuration="150ms">
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">manage_search</mat-icon>
+        Execution
+      </ng-template>
+      <div class="execution-panels">
+        <div class="panel-decision">
+          <app-decision-panel />
+        </div>
+        <div class="panel-timeline">
+          <app-event-timeline />
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        @if (state.overallState() === 'complete') {
+          <mat-icon class="tab-icon tab-icon-done">check_circle</mat-icon>
+        } @else {
+          <mat-icon class="tab-icon">summarize</mat-icon>
+        }
+        Final Result
+      </ng-template>
+      <div class="result-panel">
+        <app-final-result />
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
 </div>
 

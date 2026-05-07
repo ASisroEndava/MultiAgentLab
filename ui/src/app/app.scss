@@ -41,19 +41,71 @@
   .stream-error    { background: rgba(248,113,113,0.2); }
 }
 
-.panels-row {
-  display: grid;
-  grid-template-columns: 320px 1fr 1fr;
-  gap: 0.75rem;
-  padding: 0.75rem 0.75rem 0;
+.main-layout {
+  display: flex;
   flex: 1;
-  overflow: hidden;
   min-height: 0;
-
-  > div { overflow: hidden; display: flex; flex-direction: column; }
+  gap: 0.75rem;
+  padding: 0.75rem;
+  overflow: hidden;
 }
 
-.panel-result {
-  padding: 0 0.75rem 0.75rem;
+.panel-input {
+  width: 320px;
   flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.main-tabs {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  ::ng-deep .mat-mdc-tab-body-wrapper {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  ::ng-deep .mat-mdc-tab-body-content {
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
+.execution-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  height: 100%;
+  overflow: hidden;
+  padding-top: 0.75rem;
+
+  > div {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.result-panel {
+  height: 100%;
+  overflow-y: auto;
+  padding-top: 0.75rem;
+  box-sizing: border-box;
+}
+
+.tab-icon {
+  margin-right: 6px;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+}
+
+.tab-icon-done {
+  color: #4ade80;
 }

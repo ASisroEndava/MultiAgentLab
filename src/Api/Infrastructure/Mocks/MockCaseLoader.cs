@@ -10,7 +10,7 @@ public sealed class MockCase
     public required string Description { get; init; }
     public required ReviewRequest Request { get; init; }
     public List<string> ExpectedAgents { get; init; } = new();
-    public string ExpectedStatus { get; init; } = "amarillo";
+    public string ExpectedStatus { get; init; } = "yellow";
 }
 
 public sealed class MockCaseLoader

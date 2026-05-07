@@ -45,71 +45,71 @@
             <div class="stats-row">
               <div class="stat-item">
                 <span class="stat-label">Issues</span>
-                <span class="stat-value" [class.warn]="result.issues.length > 0">
-                  {{ result.issues.length }}
+                <span class="stat-value" [class.warn]="(result.issues?.length ?? 0) > 0">
+                  {{ result.issues?.length ?? 0 }}
                 </span>
               </div>
               <div class="stat-item">
                 <span class="stat-label">Recommendations</span>
-                <span class="stat-value">{{ result.recommendations.length }}</span>
+                <span class="stat-value">{{ result.recommendations?.length ?? 0 }}</span>
               </div>
               <div class="stat-item">
                 <span class="stat-label">Agents invoked</span>
-                <span class="stat-value">{{ result.invokedAgents.length }}</span>
+                <span class="stat-value">{{ result.invokedAgents?.length ?? 0 }}</span>
               </div>
-              @if (result.conflicts.length > 0) {
+              @if ((result.conflicts?.length ?? 0) > 0) {
                 <div class="stat-item">
                   <span class="stat-label">Conflicts</span>
-                  <span class="stat-value warn">{{ result.conflicts.length }}</span>
+                  <span class="stat-value warn">{{ result.conflicts?.length ?? 0 }}</span>
                 </div>
               }
             </div>
 
-            @if (result.invokedAgents.length > 0) {
+            @if ((result.invokedAgents?.length ?? 0) > 0) {
               <div class="agent-chips">
-                @for (a of result.invokedAgents; track a) {
+                @for (a of (result.invokedAgents ?? []); track a) {
                   <span class="agent-chip">{{ a }}</span>
                 }
-                @for (s of result.skippedAgents; track s.agent) {
+                @for (s of (result.skippedAgents ?? []); track s.agent) {
                   <span class="agent-chip skipped" [title]="s.reason">{{ s.agent }} (skip)</span>
                 }
               </div>
             }
 
             <mat-accordion multi>
-              @if (result.issues.length > 0) {
+              @if ((result.issues?.length ?? 0) > 0) {
                 <mat-expansion-panel>
                   <mat-expansion-panel-header>
                     <mat-panel-title>
                       <mat-icon class="icon-warn">warning</mat-icon>
-                      Issues ({{ result.issues.length }})
+                      Issues ({{ result.issues?.length ?? 0 }})
                     </mat-panel-title>
                   </mat-expansion-panel-header>
                   <ul class="detail-list">
-                    @for (item of result.issues; track $index) {
+                    @for (item of (result.issues ?? []); track $index) {
                       <li>{{ item }}</li>
                     }
                   </ul>
                 </mat-expansion-panel>
               }
 
-              @if (result.recommendations.length > 0) {
+              @if ((result.recommendations?.length ?? 0) > 0) {
                 <mat-expansion-panel>
                   <mat-expansion-panel-header>
                     <mat-panel-title>
                       <mat-icon class="icon-info">lightbulb</mat-icon>
-                      Recommendations ({{ result.recommendations.length }})
+                      Recommendations ({{ result.recommendations?.length ?? 0 }})
                     </mat-panel-title>
                   </mat-expansion-panel-header>
                   <ul class="detail-list">
-                    @for (item of result.recommendations; track $index) {
+                    @for (item of (result.recommendations ?? []); track $index) {
                       <li>{{ item }}</li>
                     }
                   </ul>
                 </mat-expansion-panel>
               }
 
-              @if (result.conflicts.length > 0) {
+              @if ((result.conflicts?.length ?? 0) > 0) {
                 <mat-expansion-panel>
                   <mat-expansion-panel-header>
                     <mat-panel-title>
@@ -119,27 +119,27 @@
                   </mat-expansion-panel-header>
                   <p class="section-label">Conflicts</p>
                   <ul class="detail-list">
-                    @for (item of result.conflicts; track $index) { <li>{{ item }}</li> }
+                    @for (item of (result.conflicts ?? []); track $index) { <li>{{ item }}</li> }
                   </ul>
-                  @if (result.resolution.length > 0) {
+                  @if ((result.resolution?.length ?? 0) > 0) {
                     <p class="section-label">Resolution</p>
                     <ul class="detail-list">
-                      @for (item of result.resolution; track $index) { <li>{{ item }}</li> }
+                      @for (item of (result.resolution ?? []); track $index) { <li>{{ item }}</li> }
                     </ul>
                   }
                 </mat-expansion-panel>
               }
 
-              @if (result.agentResults.length > 0) {
+              @if ((result.agentResults?.length ?? 0) > 0) {
                 <mat-expansion-panel>
                   <mat-expansion-panel-header>
                     <mat-panel-title>
                       <mat-icon class="icon-default">smart_toy</mat-icon>
-                      Agent Details ({{ result.agentResults.length }})
+                      Agent Details ({{ result.agentResults?.length ?? 0 }})
                     </mat-panel-title>
                   </mat-expansion-panel-header>
                   <div class="agent-results">
-                    @for (ar of result.agentResults; track ar.agent) {
+                    @for (ar of (result.agentResults ?? []); track ar.agent) {
                       <div class="agent-result-row">
                         <span class="ar-name">{{ ar.agent }}</span>
                         <span class="ar-status" [class]="'status-' + ar.status">{{ ar.status }}</span>

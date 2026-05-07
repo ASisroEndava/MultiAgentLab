@@ -31,6 +31,10 @@ export class ReviewApiService {
     return this.http.post<ReviewResult>(`${this.base}/review-story`, request);
   }
 
+  startReviewStory(request: ReviewRequest): Observable<StartCaseResponse> {
+    return this.http.post<StartCaseResponse>(`${this.base}/review-story/start`, request);
+  }
+
   getExecutionLog(executionId: string): Observable<ExecutionLogEvent[]> {
     return this.http.get<ExecutionLogEvent[]>(
       `${this.base}/executions/${executionId}/log`

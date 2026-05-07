@@ -25,9 +25,9 @@ export class ExecutionStateService {
   readonly hasResult = computed(() => this.finalResult() !== null);
   readonly statusColor = computed(() => {
     const s = this.finalResult()?.status;
-    if (s === 'verde') return 'success';
-    if (s === 'amarillo') return 'warning';
-    if (s === 'rojo') return 'error';
+    if (s === 'green') return 'success';
+    if (s === 'yellow') return 'warning';
+    if (s === 'red') return 'error';
     return 'default';
   });
 
@@ -52,13 +52,13 @@ export class ExecutionStateService {
     this.executionId.set(result.executionId);
     this.finalResult.set(result);
     const allAgents: AgentCard[] = [
-      ...result.invokedAgents.map(name => ({
+      ...(result.invokedAgents ?? []).map(name => ({
         name,
         state: 'completed' as const,
-        score: result.agentResults.find(a => a.agent === name)?.score,
-        issueCount: result.agentResults.find(a => a.agent === name)?.issues.length ?? 0,
+        score: result.agentResults?.find(a => a.agent === name)?.score,
+        issueCount: result.agentResults?.find(a => a.agent === name)?.issues?.length ?? 0,
       })),
-      ...result.skippedAgents.map(s => ({
+      ...(result.skippedAgents ?? []).map(s => ({
         name: s.agent,
         state: 'skipped' as const,
         skipReason: s.reason,

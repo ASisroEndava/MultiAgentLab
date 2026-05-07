@@ -28,7 +28,8 @@ public sealed class JsonlExecutionLogger : IExecutionLogger
         var filePath = Path.Combine(_logDirectory, $"{normalized.ExecutionId}.jsonl");
         var json = JsonSerializer.Serialize(normalized, new JsonSerializerOptions
         {
-            WriteIndented = false
+            WriteIndented = false,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         });
 
         await _fileLock.WaitAsync(cancellationToken);
@@ -69,7 +70,10 @@ public sealed class JsonlExecutionLogger : IExecutionLogger
         if (logEvent.Data is JsonElement)
             return logEvent;
 
-        var dataJson = JsonSerializer.Serialize(logEvent.Data);
+        var dataJson = JsonSerializer.Serialize(logEvent.Data, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
         var dataElement = JsonSerializer.Deserialize<JsonElement>(dataJson);
 
         return new ExecutionLogEvent

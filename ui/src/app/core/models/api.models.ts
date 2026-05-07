@@ -38,17 +38,17 @@ export interface SkippedAgent {
 
 export interface ReviewResult {
   executionId: string;
-  status: 'verde' | 'amarillo' | 'rojo';
+  status: 'green' | 'yellow' | 'red';
   summary?: string;
   provider: string;
   model: string;
-  invokedAgents: string[];
-  skippedAgents: SkippedAgent[];
-  issues: string[];
-  recommendations: string[];
-  conflicts: string[];
-  resolution: string[];
-  agentResults: AgentResult[];
+  invokedAgents?: string[];
+  skippedAgents?: SkippedAgent[];
+  issues?: string[];
+  recommendations?: string[];
+  conflicts?: string[];
+  resolution?: string[];
+  agentResults?: AgentResult[];
 }
 
 export interface ExecutionLogEvent {
