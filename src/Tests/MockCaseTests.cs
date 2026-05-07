@@ -62,7 +62,7 @@ public class MockCaseTests
 
         Assert.NotNull(case1);
         Assert.Equal("mock-01", case1!.CaseId);
-        Assert.Contains("boton", case1.Request.StoryText.ToLowerInvariant());
+        Assert.Contains("button", case1.Request.StoryText.ToLowerInvariant());
     }
 
     [Fact]

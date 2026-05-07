@@ -1,120 +1,120 @@
-# MultiAgentLab - POC Multiagente de Revision de Historias y Requerimientos
+# MultiAgentLab - Multi-Agent POC for User Story and Requirements Review
 
-## Descripcion
+## Description
 
-Prueba de concepto de un sistema multiagente que revisa historias de usuario y requerimientos funcionales/tecnicos. Un **agente supervisor** coordina especialistas, resuelve conflictos entre hallazgos y genera una salida consolidada y accionable.
+Proof of concept of a multi-agent system that reviews user stories and functional/technical requirements. A **supervisor agent** coordinates specialists, resolves conflicts between findings, and generates a consolidated and actionable output.
 
-## Arquitectura
+## Architecture
 
 ```
-Usuario -> Review API -> Supervisor -> Agentes Especializados -> LLM (Bedrock/Ollama)
-                                    -> Execution Logger (JSONL)
+User -> Review API -> Supervisor -> Specialized Agents -> LLM (Bedrock/Ollama)
+                                 -> Execution Logger (JSONL)
 ```
 
-### Agentes Especializados
+### Specialized Agents
 
-| Agente | Proposito |
-|--------|-----------|
-| **Clarity** | Detecta ambiguedades, reglas faltantes y definiciones incompletas |
-| **QA** | Evalua testabilidad, criterios de aceptacion y escenarios borde |
-| **Technical** | Analiza impacto tecnico, dependencias, performance y complejidad |
-| **UX** | Revisa interaccion, mensajes, consistencia de interfaz y usabilidad |
-| **Compliance** | Detecta riesgos de seguridad, privacidad y regulatorios |
+| Agent | Purpose |
+|-------|---------|
+| **Clarity** | Detects ambiguities, missing rules, and incomplete definitions |
+| **QA** | Evaluates testability, acceptance criteria, and edge scenarios |
+| **Technical** | Analyzes technical impact, dependencies, performance, and complexity |
+| **UX** | Reviews interaction, messages, interface consistency, and usability |
+| **Compliance** | Detects security, privacy, and regulatory risks |
 
-### Seleccion Dinamica
+### Dynamic Selection
 
-El supervisor decide que agentes invocar segun el contenido de la historia. No todos los agentes se ejecutan siempre.
+The supervisor decides which agents to invoke based on the story content. Not all agents are executed every time.
 
-### Ejecucion en Paralelo
+### Parallel Execution
 
-Los agentes seleccionados se ejecutan en paralelo (`Task.WhenAll`), reduciendo el tiempo total al del agente mas lento.
+Selected agents run in parallel (`Task.WhenAll`), reducing total time to that of the slowest agent.
 
-### Proveedores LLM
+### LLM Providers
 
-- **Amazon Bedrock** — integracion cloud gestionada
-- **Ollama** — ejecucion local sin dependencia de red (modelo recomendado: `qwen2.5:3b`)
+- **Amazon Bedrock** — managed cloud integration
+- **Ollama** — local execution with no network dependency (recommended model: `qwen2.5:3b`)
 
-## Stack Tecnologico
+## Technology Stack
 
 - .NET 9 Web API
 - System.Text.Json
 - Amazon Bedrock / Ollama
-- JSONL para logging
+- JSONL for logging
 - Swagger UI (Swashbuckle)
-- Dashboard HTML integrado
+- Embedded HTML Dashboard
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 /src
-  /Api                  - Endpoints REST
+  /Api                  - REST Endpoints
   /Application
-    /Supervisor         - Orquestacion, seleccion de agentes, resolucion de conflictos
-    /Agents             - 5 agentes especializados
-    /Prompts            - Prompts de cada agente (.prompt.md)
-  /Domain               - Modelos de dominio
+    /Supervisor         - Orchestration, agent selection, conflict resolution
+    /Agents             - 5 specialized agents
+    /Prompts            - Agent prompts (.prompt.md)
+  /Domain               - Domain models
   /Infrastructure
-    /LLM                - Abstraccion de proveedores (Bedrock, Ollama)
-    /Logging            - Logger JSONL
-    /Mocks              - Cargador de casos mock
-  /Tests                - Pruebas unitarias y de integracion
-/mock_inputs            - Archivos JSON de casos demo
+    /LLM                - Provider abstraction (Bedrock, Ollama)
+    /Logging            - JSONL Logger
+    /Mocks              - Mock case loader
+  /Tests                - Unit and integration tests
+/mock_inputs            - JSON files for demo cases
 ```
 
 ## Endpoints
 
-| Metodo | Ruta | Descripcion |
-|--------|------|-------------|
-| POST | `/review-story` | Ejecuta revision sobre una historia |
-| GET | `/executions` | Lista todas las ejecuciones pasadas con resumen |
-| GET | `/executions/{executionId}` | Devuelve resultado final |
-| GET | `/executions/{executionId}/log` | Devuelve log completo de eventos (JSON) |
-| GET | `/executions/{executionId}/log/text` | Devuelve log formateado como timeline (texto plano) |
-| GET | `/mock-cases` | Lista casos demo disponibles |
-| POST | `/mock-cases/{caseId}/run` | Ejecuta caso mock (sincrono, espera resultado) |
-| POST | `/mock-cases/{caseId}/start` | Inicia ejecucion en background, retorna executionId |
-| GET | `/dashboard` | Dashboard visual interactivo |
+| Method | Route | Description |
+|--------|-------|-------------|
+| POST | `/review-story` | Executes review on a story |
+| GET | `/executions` | Lists all past executions with summary |
+| GET | `/executions/{executionId}` | Returns final result |
+| GET | `/executions/{executionId}/log` | Returns complete event log (JSON) |
+| GET | `/executions/{executionId}/log/text` | Returns formatted log as timeline (plain text) |
+| GET | `/mock-cases` | Lists available demo cases |
+| POST | `/mock-cases/{caseId}/run` | Runs mock case (synchronous, waits for result) |
+| POST | `/mock-cases/{caseId}/start` | Starts background execution, returns executionId |
+| GET | `/dashboard` | Interactive visual dashboard |
 
-## Ejecucion
+## Running
 
-### Prerequisitos
+### Prerequisites
 
 - .NET 9 SDK
-- (Opcional) Ollama corriendo localmente en `http://localhost:11434` con modelo `qwen2.5:3b`
-- (Opcional) Credenciales AWS configuradas para Bedrock
+- (Optional) Ollama running locally at `http://localhost:11434` with model `qwen2.5:3b`
+- (Optional) AWS credentials configured for Bedrock
 
-### Correr la aplicacion
+### Run the application
 
-**Opcion 1: Desde Visual Studio**
+**Option 1: From Visual Studio**
 
-Abrir `MultiAgentLab.sln` y presionar F5.
+Open `MultiAgentLab.sln` and press F5.
 
-**Opcion 2: Desde linea de comandos**
+**Option 2: From command line**
 
 ```bash
 dotnet build
 .\src\Api\bin\Debug\net9.0\MultiAgentLab.Api.exe --urls "http://localhost:5050"
 ```
 
-> **Nota**: `dotnet run` puede fallar en entornos con politicas de seguridad corporativas (WDAC/AppLocker). Usar el `.exe` directamente o Visual Studio.
+> **Note**: `dotnet run` may fail in environments with corporate security policies (WDAC/AppLocker). Use the `.exe` directly or Visual Studio.
 
-La API se levanta en `http://127.0.0.1:5050`.
+The API starts at `http://127.0.0.1:5050`.
 
-### Acceso
+### Access
 
 - **Swagger UI**: http://127.0.0.1:5050/
 - **Dashboard**: http://127.0.0.1:5050/dashboard
-- **Log visual**: http://127.0.0.1:5050/executions/{executionId}/log/text
+- **Visual log**: http://127.0.0.1:5050/executions/{executionId}/log/text
 
-### Ejemplo de uso
+### Usage example
 
 ```bash
 curl -X POST http://127.0.0.1:5050/review-story \
   -H "Content-Type: application/json" \
   -d '{
     "storyId": "story-001",
-    "title": "Resetear contrasena",
-    "storyText": "Como usuario, quiero poder resetear mi contrasena desde la pantalla de login.",
+    "title": "Reset password",
+    "storyText": "As a user, I want to be able to reset my password from the login screen.",
     "provider": {
       "type": "ollama",
       "model": "qwen2.5:3b",
@@ -125,31 +125,31 @@ curl -X POST http://127.0.0.1:5050/review-story \
   }'
 ```
 
-## Casos Mock para Demo
+## Mock Cases for Demo
 
-1. **Cambio de label** — caso simple, pocos agentes (esperado: verde)
-2. **Resetear contrasena** — historia con gaps deliberados en flujo de UI (esperado: amarillo)
-3. **Reintentos automaticos** — historia backend con ambiguedades tecnicas (esperado: amarillo)
-4. **Descarga de datos personales** — datos sensibles sin autenticacion ni auditoria (esperado: rojo)
-5. **Editar direccion de envio** — tension UX vs tecnico con API externa (esperado: amarillo)
+1. **Label change** — simple case, few agents (expected: green)
+2. **Reset password** — story with deliberate gaps in UI flow (expected: yellow)
+3. **Automatic retries** — backend story with technical ambiguities (expected: yellow)
+4. **Personal data download** — sensitive data without authentication or audit (expected: red)
+5. **Edit shipping address** — UX vs technical tension with external API (expected: yellow)
 
-> Las historias mock incluyen ambiguedades y omisiones deliberadas para que incluso modelos chicos detecten issues.
+> Mock stories include deliberate ambiguities and omissions so that even small models detect issues.
 
 ### Dashboard
 
-El dashboard (`/dashboard`) incluye:
-- **Tab Ejecutar**: tarjetas de mock cases con ejecucion en background y **progreso en vivo** (estado de cada agente en tiempo real)
-- **Tab Historial**: lista de ejecuciones pasadas con acceso a resultados y logs
-- Muestra el **requerimiento enviado** a los agentes en el panel de resultado
-- Indicadores visuales para `parse_error` (cuando el LLM devuelve JSON invalido)
+The dashboard (`/dashboard`) includes:
+- **Execute tab**: mock case cards with background execution and **live progress** (real-time status of each agent)
+- **History tab**: list of past executions with access to results and logs
+- Shows the **request sent** to agents in the result panel
+- Visual indicators for `parse_error` (when the LLM returns invalid JSON)
 
-## Documentacion
+## Documentation
 
-- `documentation/01_Diseno_Funcional_y_Solucion_POC_Revision_Historias.md`
-- `documentation/02_Arquitectura_Tecnica_POC_Multiagente_Revision_Historias.md`
-- `documentation/03_Especificacion_Implementacion_POC_Multiagente_Revision_Historias.md`
-- `documentation/04_Casos_Mock_y_Guion_Demo.md`
+- `documentation/01_Functional_Design_and_Solution_POC_Story_Review.md`
+- `documentation/02_Technical_Architecture_POC_Multiagent_Story_Review.md`
+- `documentation/03_Implementation_Specification_POC_Multiagent_Story_Review.md`
+- `documentation/04_Mock_Cases_and_Demo_Script.md`
 
-## Licencia
+## License
 
-POC interno — uso exclusivo para aprendizaje y demostracion.
+Internal POC — for learning and demonstration purposes only.

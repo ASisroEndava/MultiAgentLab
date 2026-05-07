@@ -1,0 +1,23 @@
+{
+  "caseId": "mock-05",
+  "title": "Case 5 - Edit shipping address",
+  "description": "Shows conflict resolution between UX and technical agents.",
+  "expectedAgents": ["clarity", "qa", "technical", "ux"],
+  "expectedStatus": "yellow",
+  "request": {
+    "storyId": "story-005",
+    "title": "Edit shipping address",
+    "storyText": "As a user, I want to edit my shipping address from my profile. The form should be easy to use and show autocomplete suggestions using the Google Maps API.",
+    "provider": {
+      "type": "ollama",
+      "model": "qwen2.5:3b",
+      "endpoint": "http://localhost:11434",
+      "temperature": 0.2
+    },
+    "logging": {
+      "level": "full",
+      "includePrompts": true,
+      "includeResponses": true
+    }
+  }
+}

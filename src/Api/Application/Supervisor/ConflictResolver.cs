@@ -17,28 +17,28 @@ public sealed class ConflictResolver
         if (uxResult != null && techResult != null)
         {
             var uxWantsSimplicity = uxResult.Recommendations
-                .Any(r => ContainsAny(r, "simple", "inmediata", "rapida", "directa", "inline"));
+                .Any(r => ContainsAny(r, "simple", "immediate", "quick", "direct", "inline"));
             var techWantsRestriction = techResult.Issues
-                .Any(i => ContainsAny(i, "impacto", "restriccion", "estado", "proceso", "consistencia"));
+                .Any(i => ContainsAny(i, "impact", "restriction", "state", "process", "consistency"));
 
             if (uxWantsSimplicity && techWantsRestriction)
             {
-                conflicts.Add("UX propone interaccion simplificada; tecnico detecta restricciones por estado o consistencia");
-                resolutions.Add("Priorizar factibilidad tecnica; aplicar restricciones visibles en UI");
+                conflicts.Add("UX proposes simplified interaction; technical detects restrictions due to state or consistency");
+                resolutions.Add("Prioritize technical feasibility; apply visible restrictions in UI");
             }
         }
 
         if (uxResult != null && complianceResult != null)
         {
             var uxSimplifies = uxResult.Recommendations
-                .Any(r => ContainsAny(r, "simplificar", "omitir", "reducir", "menos pasos"));
+                .Any(r => ContainsAny(r, "simplify", "omit", "reduce", "fewer steps"));
             var complianceRequires = complianceResult.Issues
-                .Any(i => ContainsAny(i, "validar", "autorizacion", "identidad", "auditoria", "cifrado"));
+                .Any(i => ContainsAny(i, "validate", "authorization", "identity", "audit", "encryption"));
 
             if (uxSimplifies && complianceRequires)
             {
-                conflicts.Add("UX propone simplificacion que puede comprometer seguridad o privacidad");
-                resolutions.Add("Compliance tiene prioridad; mantener validaciones de seguridad aunque agreguen friccion");
+                conflicts.Add("UX proposes simplification that may compromise security or privacy");
+                resolutions.Add("Compliance takes priority; maintain security validations even if they add friction");
             }
         }
 
@@ -48,11 +48,11 @@ public sealed class ConflictResolver
             if (severeMissing)
             {
                 var hasTestabilityGap = qaResult.Issues
-                    .Any(i => ContainsAny(i, "criterio", "aceptacion", "escenario", "validacion", "error"));
+                    .Any(i => ContainsAny(i, "criteria", "acceptance", "scenario", "validation", "error"));
                 if (hasTestabilityGap)
                 {
-                    conflicts.Add("QA detecta ausencia severa de criterios de aceptacion");
-                    resolutions.Add("El estado final no debe ser verde mientras falten criterios de aceptacion basicos");
+                    conflicts.Add("QA detects severe absence of acceptance criteria");
+                    resolutions.Add("Final status should not be green while basic acceptance criteria are missing");
                 }
             }
         }

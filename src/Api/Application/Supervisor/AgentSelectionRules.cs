@@ -6,40 +6,40 @@ public sealed class AgentSelectionRules
 {
     private static readonly string[] UxKeywords =
     {
-        "pantalla", "boton", "formulario", "perfil", "mostrar", "interfaz",
-        "ui", "ux", "pagina", "click", "navegacion", "feedback", "mensaje",
-        "copy", "label", "texto", "login", "menu", "modal", "popup",
-        "confirmar", "cancelar", "editar", "visualizar"
+        "screen", "button", "form", "profile", "display", "interface",
+        "ui", "ux", "page", "click", "navigation", "feedback", "message",
+        "copy", "label", "text", "login", "menu", "modal", "popup",
+        "confirm", "cancel", "edit", "view"
     };
 
     private static readonly string[] TechnicalKeywords =
     {
-        "retry", "reintento", "reintentar", "scheduler", "cola", "queue",
-        "integracion", "notificacion", "persistencia", "backend", "api",
-        "asincrono", "async", "batch", "cron", "webhook", "microservicio",
-        "base de datos", "cache", "consistencia", "idempotencia", "timeout",
-        "performance", "escalabilidad"
+        "retry", "retries", "scheduler", "queue",
+        "integration", "notification", "persistence", "backend", "api",
+        "asynchronous", "async", "batch", "cron", "webhook", "microservice",
+        "database", "cache", "consistency", "idempotency", "timeout",
+        "performance", "scalability"
     };
 
     private static readonly string[] ComplianceKeywords =
     {
-        "datos personales", "pii", "documento", "reporte", "transacciones",
-        "auditoria", "regulacion", "compliance", "seguridad", "privacidad",
-        "autorizacion", "descarga", "exportacion", "gdpr", "sensible",
-        "cifrado", "encriptacion", "fraude", "titular"
+        "personal data", "pii", "document", "report", "transactions",
+        "audit", "regulation", "compliance", "security", "privacy",
+        "authorization", "download", "export", "gdpr", "sensitive",
+        "encryption", "fraud", "holder", "identity"
     };
 
     private static readonly string[] QaKeywords =
     {
-        "validacion", "error", "estado", "regla", "criterio", "aceptacion",
-        "flujo", "escenario", "limite", "maximo", "minimo", "obligatorio",
-        "requerido", "falla", "exito", "intentos", "expiracion"
+        "validation", "error", "state", "rule", "criteria", "acceptance",
+        "flow", "scenario", "limit", "maximum", "minimum", "mandatory",
+        "required", "failure", "success", "attempts", "expiration"
     };
 
     private static readonly string[] TrivialKeywords =
     {
-        "cambiar texto", "renombrar", "ajustar copy", "cambiar label",
-        "modificar etiqueta", "actualizar nombre"
+        "change text", "rename", "adjust copy", "change label",
+        "update name", "modify tag"
     };
 
     public AgentSelection Select(ReviewRequest request)
@@ -72,7 +72,7 @@ public sealed class AgentSelectionRules
             skipped.Add(new SkippedAgent
             {
                 Agent = "qa",
-                Reason = "Cambio trivial sin reglas de validacion ni flujos complejos"
+                Reason = "Trivial change without validation rules or complex flows"
             });
         }
 
@@ -85,7 +85,7 @@ public sealed class AgentSelectionRules
             skipped.Add(new SkippedAgent
             {
                 Agent = "technical",
-                Reason = "No se detecto impacto tecnico, integraciones ni procesos asincronos"
+                Reason = "No technical impact, integrations, or asynchronous processes detected"
             });
         }
 
@@ -98,7 +98,7 @@ public sealed class AgentSelectionRules
             skipped.Add(new SkippedAgent
             {
                 Agent = "ux",
-                Reason = "No se detecto interaccion de usuario visible ni elementos de interfaz"
+                Reason = "No visible user interaction or interface elements detected"
             });
         }
 
@@ -111,7 +111,7 @@ public sealed class AgentSelectionRules
             skipped.Add(new SkippedAgent
             {
                 Agent = "compliance",
-                Reason = "No se detectaron datos sensibles ni requisitos regulatorios"
+                Reason = "No sensitive data or regulatory requirements detected"
             });
         }
 

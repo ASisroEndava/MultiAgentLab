@@ -19,7 +19,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "MultiAgentLab API", Version = "v1", Description = "POC Multiagente - Revision de Historias de Usuario" });
+    c.SwaggerDoc("v1", new() { Title = "MultiAgentLab API", Version = "v1", Description = "Multi-Agent POC - User Story Review" });
 });
 builder.Services.AddHttpClient();
 

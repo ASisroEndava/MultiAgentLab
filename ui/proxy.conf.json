@@ -1,5 +1,5 @@
 {
-  "/mock-cases": { "target": "http://localhost:5000", "secure": false, "logLevel": "info" },
-  "/executions": { "target": "http://localhost:5000", "secure": false, "logLevel": "info" },
-  "/review-story": { "target": "http://localhost:5000", "secure": false, "logLevel": "info" }
+  "/mock-cases": { "target": "http://localhost:5050", "secure": false, "logLevel": "info" },
+  "/executions": { "target": "http://localhost:5050", "secure": false, "logLevel": "info" },
+  "/review-story": { "target": "http://localhost:5050", "secure": false, "logLevel": "info" }
 }

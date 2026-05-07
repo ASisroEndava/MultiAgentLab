@@ -1,0 +1,23 @@
+{
+  "caseId": "mock-04",
+  "title": "Case 4 - Personal data download",
+  "description": "Shows the activation of the compliance agent and a higher severity output.",
+  "expectedAgents": ["clarity", "qa", "technical", "compliance"],
+  "expectedStatus": "red",
+  "request": {
+    "storyId": "story-004",
+    "title": "Download personal report",
+    "storyText": "As a customer, I want to download a report with all my personal data, transaction history, and attached documents from the last year.",
+    "provider": {
+      "type": "ollama",
+      "model": "qwen2.5:3b",
+      "endpoint": "http://localhost:11434",
+      "temperature": 0.2
+    },
+    "logging": {
+      "level": "full",
+      "includePrompts": true,
+      "includeResponses": true
+    }
+  }
+}

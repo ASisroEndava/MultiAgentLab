@@ -1,0 +1,23 @@
+{
+  "caseId": "mock-03",
+  "title": "Case 3 - Automatic notification retries",
+  "description": "Backend story where UX does not participate. The technical agent is activated.",
+  "expectedAgents": ["clarity", "qa", "technical"],
+  "expectedStatus": "yellow",
+  "request": {
+    "storyId": "story-003",
+    "title": "Automatic retries",
+    "storyText": "As a system, I need to automatically retry sending failed notifications.",
+    "provider": {
+      "type": "ollama",
+      "model": "qwen2.5:3b",
+      "endpoint": "http://localhost:11434",
+      "temperature": 0.1
+    },
+    "logging": {
+      "level": "full",
+      "includePrompts": true,
+      "includeResponses": true
+    }
+  }
+}
