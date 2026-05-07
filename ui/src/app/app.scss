@@ -1,0 +1,111 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-toolbar {
+  flex-shrink: 0;
+  gap: 0.5rem;
+  height: 52px;
+
+  mat-icon { font-size: 22px; }
+
+  .toolbar-title {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .toolbar-sub {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    font-weight: 400;
+  }
+
+  .spacer { flex: 1; }
+
+  .stream-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.625rem;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.1);
+    mat-icon { font-size: 14px; width: 14px; height: 14px; }
+  }
+  .stream-polling  { background: rgba(96,165,250,0.2); }
+  .stream-complete { background: rgba(74,222,128,0.2); }
+  .stream-error    { background: rgba(248,113,113,0.2); }
+}
+
+.main-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  overflow: hidden;
+}
+
+.panel-input {
+  width: 320px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.main-tabs {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  ::ng-deep .mat-mdc-tab-body-wrapper {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  ::ng-deep .mat-mdc-tab-body-content {
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
+.execution-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  height: 100%;
+  overflow: hidden;
+  padding-top: 0.75rem;
+
+  > div {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.result-panel {
+  height: 100%;
+  overflow-y: auto;
+  padding-top: 0.75rem;
+  box-sizing: border-box;
+}
+
+.tab-icon {
+  margin-right: 6px;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+}
+
+.tab-icon-done {
+  color: #4ade80;
+}

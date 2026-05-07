@@ -15,6 +15,10 @@ public static class ReviewEndpoints
            .WithName("ReviewStory")
            .WithOpenApi();
 
+        app.MapPost("/review-story/start", StartReviewStoryAsync)
+           .WithName("StartReviewStory")
+           .WithOpenApi();
+
         app.MapGet("/executions", ListExecutionsAsync)
            .WithName("ListExecutions")
            .WithOpenApi();
@@ -66,6 +70,28 @@ public static class ReviewEndpoints
                 statusCode: 500,
                 title: "Error during review");
         }
+    }
+
+    private static Task<IResult> StartReviewStoryAsync(
+        ReviewRequest request,
+        ReviewSupervisor supervisor,
+        IExecutionLogger executionLogger)
+    {
+        var executionId = $"exec-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid().ToString()[..8]}";
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await supervisor.ReviewAsync(request, CancellationToken.None, executionId);
+            }
+            catch (Exception ex)
+            {
+                await executionLogger.LogAsync(LogEvents.ExecutionFailed(executionId, ex.Message));
+            }
+        });
+
+        return Task.FromResult(Results.Ok(new { executionId, status = "started" }));
     }
 
     private static async Task<IResult> ListExecutionsAsync(
@@ -121,10 +147,6 @@ public static class ReviewEndpoints
         CancellationToken cancellationToken)
     {
         var logs = await logger.GetLogsAsync(executionId, cancellationToken);
-
-        if (logs.Count == 0)
-            return Results.NotFound(new { message = $"No logs found for execution {executionId}" });
-
         return Results.Ok(logs);
     }
 
@@ -184,6 +206,7 @@ public static class ReviewEndpoints
         string caseId,
         MockCaseLoader mockLoader,
         ReviewSupervisor supervisor,
+        IExecutionLogger executionLogger,
         CancellationToken cancellationToken)
     {
         var mockCase = await mockLoader.GetCaseAsync(caseId, cancellationToken);
@@ -199,8 +222,9 @@ public static class ReviewEndpoints
             {
                 await supervisor.ReviewAsync(mockCase.Request, CancellationToken.None, executionId);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                await executionLogger.LogAsync(LogEvents.ExecutionFailed(executionId, ex.Message));
             }
         });
 
@@ -405,9 +429,9 @@ public static class ReviewEndpoints
         .mock-card .agents { display: flex; gap: 0.375rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
         .badge { padding: 0.2rem 0.5rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
         .badge-agent { background: #1e3a5f; color: #60a5fa; }
-        .badge-verde { background: #14532d; color: #4ade80; }
-        .badge-amarillo { background: #713f12; color: #facc15; }
-        .badge-rojo { background: #7f1d1d; color: #f87171; }
+        .badge-green { background: #14532d; color: #4ade80; }
+        .badge-yellow { background: #713f12; color: #facc15; }
+        .badge-red { background: #7f1d1d; color: #f87171; }
         .badge-unknown { background: #334155; color: #94a3b8; }
         .badge-status { font-size: 0.75rem; padding: 0.25rem 0.625rem; }
         .run-btn { background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer; width: 100%; margin-top: 0.5rem; }

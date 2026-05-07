@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MultiAgentLab.Api;
 using MultiAgentLab.Api.Application.Agents;
 using MultiAgentLab.Api.Application.Supervisor;
@@ -6,6 +7,13 @@ using MultiAgentLab.Api.Infrastructure.Logging;
 using MultiAgentLab.Api.Infrastructure.Mocks;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
+
+builder.Services.AddCors();
 
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
@@ -30,6 +38,12 @@ builder.Services.AddSingleton<IReviewAgent, ComplianceAgent>();
 builder.Services.AddSingleton<ReviewSupervisor>();
 
 var app = builder.Build();
+
+app.UseRouting();
+app.UseCors(policy =>
+    policy.WithOrigins("http://localhost:4200", "http://localhost:4201")
+          .AllowAnyHeader()
+          .AllowAnyMethod());
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

@@ -121,12 +121,12 @@ public sealed class ReviewSupervisor
         var avgScore = results.Where(r => r.Status == "ok").Select(r => r.Score).DefaultIfEmpty(0.5).Average();
 
         if (hasErrors || totalIssues > 6 || conflicts.Count >= 2)
-            return "rojo";
+            return "red";
 
         if (totalIssues > 2 || conflicts.Count >= 1 || avgScore < 0.6 || hasParseErrors)
-            return "amarillo";
+            return "yellow";
 
-        return "verde";
+        return "green";
     }
 
     private static string BuildSummary(List<AgentResult> results, List<string> conflicts)

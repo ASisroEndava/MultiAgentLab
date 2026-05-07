@@ -1,0 +1,44 @@
+import { Component, effect, inject, signal } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { ExecutionStateService } from './core/services/execution-state.service';
+import { DecisionPanelComponent } from './features/decision-panel/decision-panel.component';
+import { EventTimelineComponent } from './features/event-timeline/event-timeline.component';
+import { FinalResultComponent } from './features/final-result/final-result.component';
+import { HistoryInputComponent, SubmitEvent } from './features/history-input/history-input.component';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [
+    MatToolbarModule, MatIconModule, MatTooltipModule, MatTabsModule,
+    HistoryInputComponent, DecisionPanelComponent,
+    EventTimelineComponent, FinalResultComponent,
+  ],
+  templateUrl: './app.html',
+  styleUrl: './app.scss',
+})
+export class App {
+  protected readonly state = inject(ExecutionStateService);
+  protected readonly activeTab = signal(0);
+
+  constructor() {
+    effect(() => {
+      if (this.state.overallState() === 'complete') {
+        this.activeTab.set(1);
+      }
+    });
+  }
+
+  protected onExecutionStarted(event: SubmitEvent): void {
+    this.activeTab.set(0);
+    this.state.reset();
+    if (event.type === 'async') {
+      this.state.begin(event.executionId);
+    } else {
+      this.state.setDirectResult(event.result);
+    }
+  }
+}
