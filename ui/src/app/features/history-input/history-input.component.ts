@@ -66,7 +66,6 @@ export class HistoryInputComponent implements OnInit {
   }
 
   protected onMockCaseSelect(mc: MockCaseSummary | null): void {
-    if (!mc) return;
     this.selectedMockCase.set(mc);
   }
 

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MultiAgentLab.Api;
 using MultiAgentLab.Api.Application.Agents;
 using MultiAgentLab.Api.Application.Supervisor;
@@ -6,6 +7,11 @@ using MultiAgentLab.Api.Infrastructure.Logging;
 using MultiAgentLab.Api.Infrastructure.Mocks;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
 
 builder.Services.AddCors(options =>
 {

@@ -14,7 +14,7 @@
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Load mock case</mat-label>
-      <mat-select [(ngModel)]="selectedMockCase" (ngModelChange)="onMockCaseSelect($event)">
+      <mat-select [ngModel]="selectedMockCase()" (ngModelChange)="onMockCaseSelect($event)">
         <mat-option [value]="null">— Manual input —</mat-option>
         @for (mc of mockCases(); track mc.caseId) {
           <mat-option [value]="mc">
@@ -40,24 +40,24 @@
     @if (!selectedMockCase()) {
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Story ID</mat-label>
-        <input matInput [(ngModel)]="storyId" placeholder="story-001" />
+        <input matInput [ngModel]="storyId()" (ngModelChange)="storyId.set($event)" placeholder="story-001" />
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Title</mat-label>
-        <input matInput [(ngModel)]="storyTitle" placeholder="Short title" />
+        <input matInput [ngModel]="storyTitle()" (ngModelChange)="storyTitle.set($event)" placeholder="Short title" />
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>User story text</mat-label>
-        <textarea matInput [(ngModel)]="storyText" rows="5"
+        <textarea matInput [ngModel]="storyText()" (ngModelChange)="storyText.set($event)" rows="5"
           placeholder="As a user, I want to..."></textarea>
       </mat-form-field>
 
       <div class="row-fields">
         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Provider</mat-label>
-          <mat-select [(ngModel)]="providerType" (ngModelChange)="onProviderChange()">
+          <mat-select [ngModel]="providerType()" (ngModelChange)="providerType.set($event); onProviderChange()">
             <mat-option value="ollama">Ollama</mat-option>
             <mat-option value="bedrock">Bedrock</mat-option>
           </mat-select>
@@ -65,7 +65,7 @@
 
         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Model</mat-label>
-          <mat-select [(ngModel)]="model">
+          <mat-select [ngModel]="model()" (ngModelChange)="model.set($event)">
             @for (m of availableModels; track m) {
               <mat-option [value]="m">{{ m }}</mat-option>
             }
@@ -76,14 +76,14 @@
       @if (providerType() === 'ollama') {
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Ollama endpoint</mat-label>
-          <input matInput [(ngModel)]="endpoint" />
+          <input matInput [ngModel]="endpoint()" (ngModelChange)="endpoint.set($event)" />
         </mat-form-field>
       }
 
       <div class="row-fields">
         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Logging</mat-label>
-          <mat-select [(ngModel)]="loggingLevel">
+          <mat-select [ngModel]="loggingLevel()" (ngModelChange)="loggingLevel.set($event)">
             <mat-option value="basic">Basic</mat-option>
             <mat-option value="standard">Standard</mat-option>
             <mat-option value="full">Full</mat-option>
