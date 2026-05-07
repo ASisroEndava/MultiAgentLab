@@ -7,7 +7,7 @@
   "request": {
     "storyId": "story-005",
     "title": "Edit shipping address",
-    "storyText": "As a user, I want to edit my shipping address from my profile. The form should be easy to use and show autocomplete suggestions using the Google Maps API. It is not specified whether the address is validated against an external service, what happens if the external API fails, or how it affects orders already in progress. UX wants an inline editable form, but the technical team suggests a modal due to framework restrictions. It is not defined whether previous address history is saved or whether there is a limit on addresses per account.",
+    "storyText": "As a user, I want to edit my shipping address from my profile. The form should be easy to use and show autocomplete suggestions using the Google Maps API.",
     "provider": {
       "type": "ollama",
       "model": "qwen2.5:3b",

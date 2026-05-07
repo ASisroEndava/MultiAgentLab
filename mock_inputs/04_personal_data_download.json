@@ -7,7 +7,7 @@
   "request": {
     "storyId": "story-004",
     "title": "Download personal report",
-    "storyText": "As a customer, I want to download a report with all my personal data, transaction history, and attached documents from the last year. The report is generated in an undefined format and sent through an unspecified medium. There is no mention of authentication or identity verification for the download. It is not defined whether there is a size limit, what exact data is included, or how sensitive data such as card numbers or identity documents are handled. Retention and audit of downloads have not been defined either.",
+    "storyText": "As a customer, I want to download a report with all my personal data, transaction history, and attached documents from the last year.",
     "provider": {
       "type": "ollama",
       "model": "qwen2.5:3b",
