@@ -1,7 +1,7 @@
 ﻿<mat-toolbar class="app-toolbar" color="primary">
   <mat-icon>smart_toy</mat-icon>
   <span class="toolbar-title">MultiAgentLab</span>
-  <span class="toolbar-sub">· POC — Revision de Historias de Usuario</span>
+  <span class="toolbar-sub">· POC — User Story Review</span>
   <span class="spacer"></span>
   <span class="stream-indicator" [class]="'stream-' + state.streamStatus()">
     <mat-icon>{{ state.streamStatus() === 'polling' ? 'sync' : state.streamStatus() === 'complete' ? 'check_circle' : state.streamStatus() === 'error' ? 'error' : 'radio_button_unchecked' }}</mat-icon>
