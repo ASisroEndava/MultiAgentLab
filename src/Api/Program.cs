@@ -13,13 +13,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("Angular", policy =>
-        policy.WithOrigins("http://localhost:4200", "http://localhost:4201")
-              .AllowAnyHeader()
-              .AllowAnyMethod());
-});
+builder.Services.AddCors();
 
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
@@ -45,7 +39,11 @@ builder.Services.AddSingleton<ReviewSupervisor>();
 
 var app = builder.Build();
 
-app.UseCors("Angular");
+app.UseRouting();
+app.UseCors(policy =>
+    policy.WithOrigins("http://localhost:4200", "http://localhost:4201")
+          .AllowAnyHeader()
+          .AllowAnyMethod());
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
