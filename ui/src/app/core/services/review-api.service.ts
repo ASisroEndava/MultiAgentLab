@@ -6,6 +6,7 @@ import {
   ExecutionLogEvent,
   ExecutionSummary,
   MockCaseSummary,
+  ProvidersStatus,
   ReviewRequest,
   ReviewResult,
   StartCaseResponse,
@@ -43,5 +44,16 @@ export class ReviewApiService {
 
   getExecutions(): Observable<ExecutionSummary[]> {
     return this.http.get<ExecutionSummary[]>(`${this.base}/executions`);
+  }
+
+  getOllamaModels(endpoint: string): Observable<string[]> {
+    return this.http.get<string[]>(
+      `${this.base}/providers/ollama/models`,
+      { params: { endpoint } }
+    );
+  }
+
+  getProvidersStatus(): Observable<ProvidersStatus> {
+    return this.http.get<ProvidersStatus>(`${this.base}/providers/status`);
   }
 }

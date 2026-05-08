@@ -16,7 +16,7 @@ public sealed class ModelRouter : IModelRouter
         return providerSelection.Type.ToLowerInvariant() switch
         {
             "bedrock" => new BedrockClient(),
-            "ollama" => new OllamaClient(_httpClientFactory),
+            "ollama"  => new OllamaClient(_httpClientFactory),
             _ => throw new ArgumentException($"Unknown provider type: {providerSelection.Type}")
         };
     }

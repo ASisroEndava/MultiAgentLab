@@ -48,9 +48,59 @@ public static class ReviewEndpoints
            .WithName("StartMockCase")
            .WithOpenApi();
 
+        app.MapGet("/providers/ollama/models", GetOllamaModelsAsync)
+           .WithName("GetOllamaModels")
+           .WithOpenApi();
+
+        app.MapGet("/providers/status", GetProvidersStatusAsync)
+           .WithName("GetProvidersStatus")
+           .WithOpenApi();
+
         app.MapGet("/dashboard", GetDashboard)
            .WithName("Dashboard")
            .ExcludeFromDescription();
+    }
+
+    private static Task<IResult> GetProvidersStatusAsync()
+    {
+        var awsKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
+        var awsCredFile = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".aws", "credentials");
+        var bedrockAvailable = !string.IsNullOrWhiteSpace(awsKey) || File.Exists(awsCredFile);
+
+        return Task.FromResult(Results.Ok(new
+        {
+            ollama  = true,
+            bedrock = bedrockAvailable
+        }));
+    }
+
+    private static async Task<IResult> GetOllamaModelsAsync(
+        string? endpoint,
+        IHttpClientFactory httpClientFactory)
+    {
+        try
+        {
+            var baseUrl = (endpoint ?? "http://localhost:11434").TrimEnd('/');
+            using var client = httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(5);
+            using var response = await client.GetAsync($"{baseUrl}/api/tags");
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+            var models = doc.RootElement
+                .GetProperty("models")
+                .EnumerateArray()
+                .Select(m => m.GetProperty("name").GetString() ?? "")
+                .Where(n => n.Length > 0)
+                .OrderBy(n => n)
+                .ToList();
+            return Results.Ok(models);
+        }
+        catch
+        {
+            return Results.Ok(Array.Empty<string>());
+        }
     }
 
     private static async Task<IResult> ReviewStoryAsync(

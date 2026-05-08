@@ -29,7 +29,7 @@
       @case ('error') {
         <div class="error-state">
           <mat-icon>error_outline</mat-icon>
-          <p>Execution failed. Check the backend and try again.</p>
+          <p>{{ state.error() ?? 'Execution failed. Check the backend and try again.' }}</p>
         </div>
       }
 
