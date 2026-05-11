@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
+  ComparisonResult,
   ExecutionLogEvent,
   ExecutionSummary,
   MockCaseSummary,
@@ -55,5 +56,11 @@ export class ReviewApiService {
 
   getProvidersStatus(): Observable<ProvidersStatus> {
     return this.http.get<ProvidersStatus>(`${this.base}/providers/status`);
+  }
+
+  compareExecutions(a: string, b: string): Observable<ComparisonResult> {
+    return this.http.get<ComparisonResult>(`${this.base}/executions/compare`, {
+      params: { a, b },
+    });
   }
 }

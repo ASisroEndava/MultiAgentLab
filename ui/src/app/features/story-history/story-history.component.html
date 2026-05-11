@@ -1,0 +1,104 @@
+<div class="history-layout">
+
+  <!-- History list card -->
+  <mat-card class="panel">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>history</mat-icon> Review History
+      </mat-card-title>
+      <div class="header-actions">
+        @if (!loading()) {
+          <button mat-icon-button (click)="load()" matTooltip="Refresh">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        }
+        @if (selectionCount() > 0 && !canCompare()) {
+          <span class="selection-hint">Select {{ 2 - selectionCount() }} more to compare</span>
+        }
+        @if (canCompare()) {
+          <button mat-raised-button color="accent" (click)="compare()" [disabled]="comparing()">
+            @if (comparing()) {
+              <mat-spinner diameter="16" color="accent"></mat-spinner>
+            } @else {
+              <mat-icon>compare</mat-icon>
+            }
+            Compare
+          </button>
+        }
+        @if (selectionCount() > 0) {
+          <button mat-icon-button (click)="clearSelection()" matTooltip="Clear selection">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+        <div class="center-state">
+          <mat-spinner diameter="28"></mat-spinner>
+          <p>Loading history…</p>
+        </div>
+      } @else if (error()) {
+        <div class="center-state error">
+          <mat-icon>error_outline</mat-icon>
+          <p>{{ error() }}</p>
+        </div>
+      } @else if (storyGroups().length === 0) {
+        <div class="center-state">
+          <mat-icon>history</mat-icon>
+          <p>No executions yet. Run a review to see history here.</p>
+        </div>
+      } @else {
+        <mat-accordion multi>
+          @for (group of storyGroups(); track group.storyId) {
+            <mat-expansion-panel [expanded]="storyGroups().length === 1">
+              <mat-expansion-panel-header>
+                <mat-panel-title class="group-title">
+                  <mat-icon>folder_open</mat-icon>
+                  <span class="story-id-chip">{{ group.storyId }}</span>
+                  <span class="review-count">
+                    {{ group.executions.length }} review{{ group.executions.length !== 1 ? 's' : '' }}
+                  </span>
+                </mat-panel-title>
+                <mat-panel-description class="group-desc">{{ group.title }}</mat-panel-description>
+              </mat-expansion-panel-header>
+
+              <div class="exec-list">
+                @for (exec of group.executions; track exec.executionId) {
+                  <div class="exec-row" [class.is-selected]="isSelected(exec.executionId)">
+                    <mat-checkbox
+                      [checked]="isSelected(exec.executionId)"
+                      [disabled]="isDisabled(exec.executionId)"
+                      (change)="toggle(exec.executionId)">
+                    </mat-checkbox>
+                    <app-status-badge [status]="exec.status" />
+                    <span class="exec-time">{{ exec.timestamp | date:'yyyy-MM-dd HH:mm' }}</span>
+                    <span class="exec-ms">{{ exec.totalMs | number:'1.0-0' }}ms</span>
+                    <span class="exec-id" [title]="exec.executionId">
+                      {{ exec.executionId | slice:5:17 }}…
+                    </span>
+                  </div>
+                }
+              </div>
+            </mat-expansion-panel>
+          }
+        </mat-accordion>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Comparison error -->
+  @if (comparisonError()) {
+    <div class="comparison-error">
+      <mat-icon>error</mat-icon>
+      {{ comparisonError() }}
+    </div>
+  }
+
+  <!-- Comparison result -->
+  @if (comparisonResult()) {
+    <app-comparison-panel [result]="comparisonResult()!" />
+  }
+
+</div>

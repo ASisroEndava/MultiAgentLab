@@ -98,3 +98,30 @@ export interface ProvidersStatus {
   ollama: boolean;
   bedrock: boolean;
 }
+
+export interface ExecutionSnapshot {
+  executionId: string;
+  timestamp: string;
+  storyId: string;
+  title: string;
+  provider: string;
+  model: string;
+  status: string;
+  invokedAgents: string[];
+}
+
+export interface ComparisonResult {
+  storyId: string;
+  title: string;
+  snapshotA: ExecutionSnapshot;
+  snapshotB: ExecutionSnapshot;
+  issuesOnlyInA: string[];
+  issuesOnlyInB: string[];
+  issuesInBoth: string[];
+  recommendationsOnlyInA: string[];
+  recommendationsOnlyInB: string[];
+  recommendationsInBoth: string[];
+  agentsOnlyInA: string[];
+  agentsOnlyInB: string[];
+  agentsInBoth: string[];
+}
