@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using MultiAgentLab.Api.Domain;
 
 namespace MultiAgentLab.Api.Infrastructure.Logging;
@@ -8,12 +9,35 @@ public sealed class JsonlExecutionLogger : IExecutionLogger
 {
     private readonly string _logDirectory;
     private readonly ConcurrentDictionary<string, List<ExecutionLogEvent>> _inMemoryLogs = new();
+    private readonly ConcurrentDictionary<string, ConcurrentBag<string>> _storyIndex = new();
     private static readonly SemaphoreSlim _fileLock = new(1, 1);
+    private static readonly JsonSerializerOptions _readOptions = new() { PropertyNameCaseInsensitive = true };
 
     public JsonlExecutionLogger(string? logDirectory = null)
     {
         _logDirectory = logDirectory ?? Path.Combine(AppContext.BaseDirectory, "logs");
         Directory.CreateDirectory(_logDirectory);
+        RebuildStoryIndex();
+    }
+
+    private void RebuildStoryIndex()
+    {
+        foreach (var filePath in Directory.GetFiles(_logDirectory, "*.jsonl"))
+        {
+            try
+            {
+                var firstLine = File.ReadLines(filePath).FirstOrDefault();
+                if (firstLine is null) continue;
+                var evt = JsonSerializer.Deserialize<ExecutionLogEvent>(firstLine, _readOptions);
+                if (evt?.EventType != "request_received" || evt.Data is not JsonElement data) continue;
+                if (!data.TryGetProperty("storyId", out var sid)) continue;
+                var storyId = sid.GetString();
+                if (string.IsNullOrWhiteSpace(storyId)) continue;
+                var execId = Path.GetFileNameWithoutExtension(filePath);
+                _storyIndex.GetOrAdd(storyId, _ => new ConcurrentBag<string>()).Add(execId);
+            }
+            catch { /* skip malformed files */ }
+        }
     }
 
     public async Task LogAsync(ExecutionLogEvent logEvent, CancellationToken cancellationToken = default)
@@ -40,6 +64,14 @@ public sealed class JsonlExecutionLogger : IExecutionLogger
         finally
         {
             _fileLock.Release();
+        }
+
+        if (normalized.EventType == "request_received" && normalized.Data is JsonElement reqData
+            && reqData.TryGetProperty("storyId", out var storyIdProp))
+        {
+            var storyId = storyIdProp.GetString();
+            if (!string.IsNullOrWhiteSpace(storyId))
+                _storyIndex.GetOrAdd(storyId, _ => new ConcurrentBag<string>()).Add(normalized.ExecutionId);
         }
     }
 
@@ -83,6 +115,21 @@ public sealed class JsonlExecutionLogger : IExecutionLogger
             EventType = logEvent.EventType,
             Data = dataElement
         };
+    }
+
+    public Task<List<string>> GetExecutionIdsByStoryIdAsync(string storyId, CancellationToken cancellationToken = default)
+    {
+        if (_storyIndex.TryGetValue(storyId, out var bag))
+            return Task.FromResult(bag.Distinct().OrderByDescending(id => id).ToList());
+        return Task.FromResult(new List<string>());
+    }
+
+    public async Task<ReviewResult?> GetFinalResultAsync(string executionId, CancellationToken cancellationToken = default)
+    {
+        var logs = await GetLogsAsync(executionId, cancellationToken);
+        var finalEvent = logs.LastOrDefault(l => l.EventType == "final_result_generated");
+        if (finalEvent?.Data is not JsonElement data) return null;
+        return JsonSerializer.Deserialize<ReviewResult>(data.GetRawText(), _readOptions);
     }
 
     public Task<List<string>> GetAllExecutionIdsAsync(CancellationToken cancellationToken = default)

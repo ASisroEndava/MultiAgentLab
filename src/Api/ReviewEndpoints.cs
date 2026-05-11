@@ -52,6 +52,14 @@ public static class ReviewEndpoints
            .WithName("GetOllamaModels")
            .WithOpenApi();
 
+        app.MapGet("/stories/{storyId}/executions", GetStoryExecutionsAsync)
+           .WithName("GetStoryExecutions")
+           .WithOpenApi();
+
+        app.MapGet("/executions/compare", CompareExecutionsAsync)
+           .WithName("CompareExecutions")
+           .WithOpenApi();
+
         app.MapGet("/providers/status", GetProvidersStatusAsync)
            .WithName("GetProvidersStatus")
            .WithOpenApi();
@@ -59,6 +67,138 @@ public static class ReviewEndpoints
         app.MapGet("/dashboard", GetDashboard)
            .WithName("Dashboard")
            .ExcludeFromDescription();
+    }
+
+    private static async Task<IResult> GetStoryExecutionsAsync(
+        string storyId,
+        IExecutionLogger logger,
+        CancellationToken cancellationToken)
+    {
+        var ids = await logger.GetExecutionIdsByStoryIdAsync(storyId, cancellationToken);
+        var snapshots = new List<ExecutionSnapshot>();
+
+        foreach (var id in ids)
+        {
+            var logs = await logger.GetLogsAsync(id, cancellationToken);
+            var requestEvt = logs.FirstOrDefault(l => l.EventType == "request_received");
+            var finalEvt   = logs.LastOrDefault(l => l.EventType == "final_result_generated");
+            if (requestEvt is null || finalEvt is null) continue;
+
+            var reqData   = requestEvt.Data as JsonElement? ?? default;
+            var finalData = finalEvt.Data   as JsonElement? ?? default;
+
+            snapshots.Add(new ExecutionSnapshot
+            {
+                ExecutionId   = id,
+                Timestamp     = requestEvt.Timestamp.ToString("o"),
+                StoryId       = storyId,
+                Title         = GetJsonString(reqData, "title") ?? storyId,
+                Provider      = GetJsonString(finalData, "provider") ?? "",
+                Model         = GetJsonString(finalData, "model") ?? "",
+                Status        = GetJsonString(finalData, "status") ?? "unknown",
+                InvokedAgents = GetJsonStringList(finalData, "invokedAgents")
+            });
+        }
+
+        return Results.Ok(snapshots);
+    }
+
+    private static async Task<IResult> CompareExecutionsAsync(
+        string a,
+        string b,
+        IExecutionLogger logger,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(a) || string.IsNullOrWhiteSpace(b))
+            return Results.BadRequest(new { message = "Both 'a' and 'b' query parameters are required." });
+
+        var (resultA, logsA) = await GetResultWithLogsAsync(logger, a, cancellationToken);
+        var (resultB, logsB) = await GetResultWithLogsAsync(logger, b, cancellationToken);
+
+        if (resultA is null) return Results.NotFound(new { message = $"Execution '{a}' not found." });
+        if (resultB is null) return Results.NotFound(new { message = $"Execution '{b}' not found." });
+
+        var reqDataA = (logsA.FirstOrDefault(l => l.EventType == "request_received")?.Data as JsonElement?) ?? default;
+        var reqDataB = (logsB.FirstOrDefault(l => l.EventType == "request_received")?.Data as JsonElement?) ?? default;
+        var storyIdA = GetJsonString(reqDataA, "storyId") ?? "";
+        var storyIdB = GetJsonString(reqDataB, "storyId") ?? "";
+
+        if (!string.IsNullOrEmpty(storyIdA) && !string.IsNullOrEmpty(storyIdB) && storyIdA != storyIdB)
+            return Results.BadRequest(new { message = $"Executions belong to different stories ('{storyIdA}' vs '{storyIdB}')." });
+
+        var finalDataA = (logsA.LastOrDefault(l => l.EventType == "final_result_generated")?.Data as JsonElement?) ?? default;
+        var finalDataB = (logsB.LastOrDefault(l => l.EventType == "final_result_generated")?.Data as JsonElement?) ?? default;
+
+        var snapshotA = new ExecutionSnapshot
+        {
+            ExecutionId   = a,
+            Timestamp     = logsA.FirstOrDefault(l => l.EventType == "request_received")?.Timestamp.ToString("o") ?? "",
+            StoryId       = storyIdA,
+            Title         = GetJsonString(reqDataA, "title") ?? storyIdA,
+            Provider      = GetJsonString(finalDataA, "provider") ?? "",
+            Model         = GetJsonString(finalDataA, "model") ?? "",
+            Status        = GetJsonString(finalDataA, "status") ?? "unknown",
+            InvokedAgents = GetJsonStringList(finalDataA, "invokedAgents")
+        };
+        var snapshotB = new ExecutionSnapshot
+        {
+            ExecutionId   = b,
+            Timestamp     = logsB.FirstOrDefault(l => l.EventType == "request_received")?.Timestamp.ToString("o") ?? "",
+            StoryId       = storyIdB,
+            Title         = GetJsonString(reqDataB, "title") ?? storyIdB,
+            Provider      = GetJsonString(finalDataB, "provider") ?? "",
+            Model         = GetJsonString(finalDataB, "model") ?? "",
+            Status        = GetJsonString(finalDataB, "status") ?? "unknown",
+            InvokedAgents = GetJsonStringList(finalDataB, "invokedAgents")
+        };
+
+        var issuesA  = resultA.Issues.ToHashSet();
+        var issuesB  = resultB.Issues.ToHashSet();
+        var recsA    = resultA.Recommendations.ToHashSet();
+        var recsB    = resultB.Recommendations.ToHashSet();
+        var agentsA  = resultA.InvokedAgents.ToHashSet();
+        var agentsB  = resultB.InvokedAgents.ToHashSet();
+
+        return Results.Ok(new ComparisonResult
+        {
+            StoryId                = storyIdA,
+            Title                  = snapshotA.Title,
+            SnapshotA              = snapshotA,
+            SnapshotB              = snapshotB,
+            IssuesOnlyInA          = issuesA.Except(issuesB).ToList(),
+            IssuesOnlyInB          = issuesB.Except(issuesA).ToList(),
+            IssuesInBoth           = issuesA.Intersect(issuesB).ToList(),
+            RecommendationsOnlyInA = recsA.Except(recsB).ToList(),
+            RecommendationsOnlyInB = recsB.Except(recsA).ToList(),
+            RecommendationsInBoth  = recsA.Intersect(recsB).ToList(),
+            AgentsOnlyInA          = agentsA.Except(agentsB).ToList(),
+            AgentsOnlyInB          = agentsB.Except(agentsA).ToList(),
+            AgentsInBoth           = agentsA.Intersect(agentsB).ToList()
+        });
+    }
+
+    private static async Task<(ReviewResult? result, List<ExecutionLogEvent> logs)> GetResultWithLogsAsync(
+        IExecutionLogger logger, string executionId, CancellationToken ct)
+    {
+        var logs   = await logger.GetLogsAsync(executionId, ct);
+        var result = await logger.GetFinalResultAsync(executionId, ct);
+        return (result, logs);
+    }
+
+    private static string? GetJsonString(JsonElement data, string prop)
+        => data.ValueKind == JsonValueKind.Object && data.TryGetProperty(prop, out var v)
+            ? v.GetString()
+            : null;
+
+    private static List<string> GetJsonStringList(JsonElement data, string prop)
+    {
+        if (data.ValueKind != JsonValueKind.Object || !data.TryGetProperty(prop, out var arr)
+            || arr.ValueKind != JsonValueKind.Array)
+            return [];
+        return arr.EnumerateArray()
+                  .Select(e => e.GetString() ?? "")
+                  .Where(s => s.Length > 0)
+                  .ToList();
     }
 
     private static Task<IResult> GetProvidersStatusAsync()
