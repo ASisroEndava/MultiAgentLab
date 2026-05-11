@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using Amazon;
 using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
+using Amazon.Runtime.CredentialManagement;
 using MultiAgentLab.Api.Domain;
 
 namespace MultiAgentLab.Api.Infrastructure.LLM;
@@ -18,7 +19,11 @@ public sealed class BedrockClient : IModelClient
         var sw = Stopwatch.StartNew();
 
         var region = RegionEndpoint.GetBySystemName(request.Provider.Region ?? "us-east-1");
-        using var client = new AmazonBedrockRuntimeClient(region);
+        var profileName = Environment.GetEnvironmentVariable("AWS_PROFILE") ?? "419466290453_AdministratorAccess";
+        var chain = new CredentialProfileStoreChain();
+        using var client = chain.TryGetAWSCredentials(profileName, out var credentials)
+            ? new AmazonBedrockRuntimeClient(credentials, region)
+            : new AmazonBedrockRuntimeClient(region);
 
         var payload = new
         {

@@ -7,8 +7,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MockCaseSummary, ReviewRequest, ReviewResult } from '../../core/models/api.models';
+import { MockCaseSummary, ProvidersStatus, ReviewRequest, ReviewResult } from '../../core/models/api.models';
 import { ExecutionStateService } from '../../core/services/execution-state.service';
 import { ReviewApiService } from '../../core/services/review-api.service';
 
@@ -23,7 +24,7 @@ export type SubmitEvent =
     FormsModule,
     MatCardModule, MatFormFieldModule, MatInputModule,
     MatSelectModule, MatButtonModule, MatIconModule,
-    MatProgressSpinnerModule, MatTooltipModule,
+    MatProgressSpinnerModule, MatTooltipModule, MatCheckboxModule,
   ],
   templateUrl: './history-input.component.html',
   styleUrl: './history-input.component.scss',
@@ -44,17 +45,33 @@ export class HistoryInputComponent implements OnInit {
   protected endpoint = signal('http://localhost:11434');
   protected loggingLevel = signal<'basic' | 'standard' | 'full'>('standard');
   protected includePrompts = signal(false);
+  protected includeResponses = signal(false);
   protected submitting = signal(false);
   protected loadError = signal<string | null>(null);
 
-  protected readonly ollamaModels = ['qwen2.5:3b', 'llama3.2:3b', 'mistral:7b', 'phi3:mini'];
-  protected readonly bedrockModels = ['anthropic.claude-3-haiku-20240307-v1:0', 'amazon.titan-text-express-v1'];
+  protected readonly ollamaModels = signal<string[]>(['qwen2.5:3b']);
+  protected ollamaModelsLoading = signal(false);
+  protected readonly bedrockModels = [
+    'anthropic.claude-3-haiku-20240307-v1:0',
+    'anthropic.claude-3-sonnet-20240229-v1:0',
+    'anthropic.claude-3-5-sonnet-20241022-v2:0',
+    'amazon.titan-text-express-v1',
+    'amazon.titan-text-premier-v1:0',
+    'meta.llama3-8b-instruct-v1:0',
+    'meta.llama3-70b-instruct-v1:0',
+    'mistral.mistral-7b-instruct-v0:2',
+  ];
+  protected readonly providersStatus = signal<ProvidersStatus>({ ollama: true, bedrock: false });
 
   ngOnInit(): void {
     this.api.getMockCases().subscribe({
       next: (cases) => this.mockCases.set(cases),
       error: () => this.loadError.set('Could not load mock cases — is the backend running?'),
     });
+    this.api.getProvidersStatus().subscribe({
+      next: (status) => this.providersStatus.set(status),
+    });
+    this.fetchOllamaModels();
   }
 
   protected get canSubmit(): boolean {
@@ -63,7 +80,7 @@ export class HistoryInputComponent implements OnInit {
   }
 
   protected get availableModels(): string[] {
-    return this.providerType() === 'ollama' ? this.ollamaModels : this.bedrockModels;
+    return this.providerType() === 'bedrock' ? this.bedrockModels : this.ollamaModels();
   }
 
   protected onMockCaseSelect(mc: MockCaseSummary | null): void {
@@ -71,10 +88,29 @@ export class HistoryInputComponent implements OnInit {
   }
 
   protected onProviderChange(): void {
+    if (this.providerType() === 'ollama') this.fetchOllamaModels();
     const models = this.availableModels;
     if (!models.includes(this.model())) {
-      this.model.set(models[0]);
+      this.model.set(models[0] ?? '');
     }
+  }
+
+  protected onEndpointBlur(): void {
+    if (this.providerType() === 'ollama') this.fetchOllamaModels();
+  }
+
+  private fetchOllamaModels(): void {
+    this.ollamaModelsLoading.set(true);
+    this.api.getOllamaModels(this.endpoint()).subscribe({
+      next: (models) => {
+        this.ollamaModels.set(models.length > 0 ? models : ['qwen2.5:3b']);
+        if (!this.ollamaModels().includes(this.model())) {
+          this.model.set(this.ollamaModels()[0]);
+        }
+        this.ollamaModelsLoading.set(false);
+      },
+      error: () => this.ollamaModelsLoading.set(false),
+    });
   }
 
   protected async submit(): Promise<void> {
@@ -108,6 +144,7 @@ export class HistoryInputComponent implements OnInit {
         logging: {
           level: this.loggingLevel(),
           includePrompts: this.includePrompts(),
+          includeResponses: this.includeResponses(),
         },
       };
 

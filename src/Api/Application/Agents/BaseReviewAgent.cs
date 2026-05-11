@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using MultiAgentLab.Api.Domain;
@@ -133,11 +134,93 @@ public abstract class BaseReviewAgent : IReviewAgent
     private static string RepairJson(string json)
     {
         var repaired = json;
+
+        // Fix unescaped newlines inside JSON string values
+        repaired = FixNewlinesInStrings(repaired);
+
+        // Fix missing commas between elements
         repaired = Regex.Replace(repaired, @"""(\s*\n\s*)""", @""",${1}""");
         repaired = Regex.Replace(repaired, @"\}(\s*\n\s*)\{", @"},${1}{");
         repaired = Regex.Replace(repaired, @"\}(\s*\n\s*)""", @"},${1}""");
         repaired = Regex.Replace(repaired, @"\](\s*\n\s*)""", @"],${1}""");
+
+        // Fix unescaped double quotes inside string values (e.g. a "word" inside a string)
+        repaired = FixUnescapedQuotes(repaired);
+
         return repaired;
+    }
+
+    private static string FixNewlinesInStrings(string json)
+    {
+        var sb = new StringBuilder(json.Length);
+        bool inString = false;
+        bool escaped = false;
+
+        for (int i = 0; i < json.Length; i++)
+        {
+            char c = json[i];
+
+            if (escaped) { sb.Append(c); escaped = false; continue; }
+
+            if (c == '\\' && inString) { sb.Append(c); escaped = true; continue; }
+
+            if (c == '"') { inString = !inString; sb.Append(c); continue; }
+
+            if (inString && (c == '\n' || c == '\r'))
+            {
+                if (c == '\r' && i + 1 < json.Length && json[i + 1] == '\n') i++;
+                sb.Append("\\n");
+                continue;
+            }
+
+            sb.Append(c);
+        }
+
+        return sb.ToString();
+    }
+
+    private static string FixUnescapedQuotes(string json)
+    {
+        var sb = new StringBuilder(json.Length);
+        bool inString = false;
+        bool escaped = false;
+
+        for (int i = 0; i < json.Length; i++)
+        {
+            char c = json[i];
+
+            if (escaped) { sb.Append(c); escaped = false; continue; }
+
+            if (c == '\\' && inString) { sb.Append(c); escaped = true; continue; }
+
+            if (c == '"')
+            {
+                if (!inString)
+                {
+                    inString = true;
+                    sb.Append(c);
+                }
+                else
+                {
+                    // Check if this quote ends the string or is an unescaped interior quote
+                    var rest = json.AsSpan(i + 1).TrimStart();
+                    if (rest.Length == 0 || rest[0] == ',' || rest[0] == '}' || rest[0] == ']' || rest[0] == ':')
+                    {
+                        inString = false;
+                        sb.Append(c);
+                    }
+                    else
+                    {
+                        sb.Append("\\\"");
+                    }
+                }
+                continue;
+            }
+
+            sb.Append(c);
+        }
+
+        return sb.ToString();
     }
 
     private static List<string> ExtractStringArray(JsonElement root, string propertyName)

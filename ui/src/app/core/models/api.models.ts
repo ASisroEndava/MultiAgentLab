@@ -93,3 +93,8 @@ export interface AgentCard {
 
 export type OverallState = 'idle' | 'executing' | 'complete' | 'error';
 export type StreamStatus = 'idle' | 'polling' | 'complete' | 'error';
+
+export interface ProvidersStatus {
+  ollama: boolean;
+  bedrock: boolean;
+}

@@ -18,6 +18,7 @@ export class ExecutionStateService {
   readonly events = signal<ExecutionLogEvent[]>([]);
   readonly finalResult = signal<ReviewResult | null>(null);
   readonly totalMs = signal<number | null>(null);
+  readonly error = signal<string | null>(null);
   readonly streamStatus = this.streamSvc.status;
 
   readonly isExecuting = computed(() => this.overallState() === 'executing');
@@ -78,6 +79,7 @@ export class ExecutionStateService {
     this.events.set([]);
     this.finalResult.set(null);
     this.totalMs.set(null);
+    this.error.set(null);
   }
 
   private applyEvent(event: ExecutionLogEvent): void {
@@ -118,6 +120,7 @@ export class ExecutionStateService {
         break;
       case 'execution_failed':
         this.overallState.set('error');
+        this.error.set((data['error'] as string) ?? 'Execution failed');
         break;
       case 'request_completed':
         this.totalMs.set(data['totalMs'] as number ?? null);
