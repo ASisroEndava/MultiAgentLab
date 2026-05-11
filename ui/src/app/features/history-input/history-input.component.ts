@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MockCaseSummary, ProvidersStatus, ReviewRequest, ReviewResult } from '../../core/models/api.models';
 import { ExecutionStateService } from '../../core/services/execution-state.service';
@@ -23,7 +24,7 @@ export type SubmitEvent =
     FormsModule,
     MatCardModule, MatFormFieldModule, MatInputModule,
     MatSelectModule, MatButtonModule, MatIconModule,
-    MatProgressSpinnerModule, MatTooltipModule,
+    MatProgressSpinnerModule, MatTooltipModule, MatCheckboxModule,
   ],
   templateUrl: './history-input.component.html',
   styleUrl: './history-input.component.scss',
@@ -44,6 +45,7 @@ export class HistoryInputComponent implements OnInit {
   protected endpoint = signal('http://localhost:11434');
   protected loggingLevel = signal<'basic' | 'standard' | 'full'>('standard');
   protected includePrompts = signal(false);
+  protected includeResponses = signal(false);
   protected submitting = signal(false);
   protected loadError = signal<string | null>(null);
 
@@ -142,6 +144,7 @@ export class HistoryInputComponent implements OnInit {
         logging: {
           level: this.loggingLevel(),
           includePrompts: this.includePrompts(),
+          includeResponses: this.includeResponses(),
         },
       };
 

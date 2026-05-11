@@ -93,6 +93,14 @@
             <mat-option value="full">Full</mat-option>
           </mat-select>
         </mat-form-field>
+        <div class="logging-checkboxes">
+          <mat-checkbox [ngModel]="includePrompts()" (ngModelChange)="includePrompts.set($event)">
+            Include Prompts
+          </mat-checkbox>
+          <mat-checkbox [ngModel]="includeResponses()" (ngModelChange)="includeResponses.set($event)">
+            Include Responses
+          </mat-checkbox>
+        </div>
       </div>
     }
   </mat-card-content>

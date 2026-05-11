@@ -46,4 +46,10 @@
 .mock-option-title { font-weight: 500; }
 .mock-option-desc  { font-size: 0.78rem; color: var(--mat-sys-on-surface-variant); }
 
+.logging-checkboxes {
+  display: flex; flex-direction: column; gap: 0.25rem;
+  justify-content: center; padding-left: 0.5rem;
+  font-size: 0.85rem;
+}
+
 button mat-spinner { display: inline-block; margin-right: 0.25rem; vertical-align: middle; }
