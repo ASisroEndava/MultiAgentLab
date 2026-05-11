@@ -49,7 +49,16 @@ export class HistoryInputComponent implements OnInit {
 
   protected readonly ollamaModels = signal<string[]>(['qwen2.5:3b']);
   protected ollamaModelsLoading = signal(false);
-  protected readonly bedrockModels = ['anthropic.claude-3-haiku-20240307-v1:0', 'amazon.titan-text-express-v1'];
+  protected readonly bedrockModels = [
+    'anthropic.claude-3-haiku-20240307-v1:0',
+    'anthropic.claude-3-sonnet-20240229-v1:0',
+    'anthropic.claude-3-5-sonnet-20241022-v2:0',
+    'amazon.titan-text-express-v1',
+    'amazon.titan-text-premier-v1:0',
+    'meta.llama3-8b-instruct-v1:0',
+    'meta.llama3-70b-instruct-v1:0',
+    'mistral.mistral-7b-instruct-v0:2',
+  ];
   protected readonly providersStatus = signal<ProvidersStatus>({ ollama: true, bedrock: false });
 
   ngOnInit(): void {
