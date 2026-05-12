@@ -302,6 +302,13 @@ public static class ReviewEndpoints
             var finalData = final_?.Data as JsonElement? ?? default;
             var completedData = completed?.Data as JsonElement? ?? default;
 
+            var providerFromFinal = finalData.ValueKind == JsonValueKind.Object && finalData.TryGetProperty("provider", out var prov) ? prov.GetString() : null;
+            var modelFromFinal    = finalData.ValueKind == JsonValueKind.Object && finalData.TryGetProperty("model", out var mod) ? mod.GetString() : null;
+
+            var providerObj = data.ValueKind == JsonValueKind.Object && data.TryGetProperty("provider", out var po) && po.ValueKind == JsonValueKind.Object ? po : default;
+            var providerFallback = providerObj.ValueKind == JsonValueKind.Object && providerObj.TryGetProperty("type", out var pt) ? pt.GetString() : null;
+            var modelFallback    = providerObj.ValueKind == JsonValueKind.Object && providerObj.TryGetProperty("model", out var pm) ? pm.GetString() : null;
+
             summaries.Add(new
             {
                 executionId = id,
@@ -310,7 +317,9 @@ public static class ReviewEndpoints
                 storyId = data.ValueKind == JsonValueKind.Object && data.TryGetProperty("storyId", out var s) ? s.GetString() : null,
                 status = finalData.ValueKind == JsonValueKind.Object && finalData.TryGetProperty("status", out var st) ? st.GetString() : "unknown",
                 totalMs = completedData.ValueKind == JsonValueKind.Object && completedData.TryGetProperty("totalMs", out var ms) ? ms.GetDouble() : 0,
-                eventCount = logs.Count
+                eventCount = logs.Count,
+                provider = providerFromFinal ?? providerFallback,
+                model = modelFromFinal ?? modelFallback,
             });
         }
 

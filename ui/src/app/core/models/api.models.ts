@@ -80,6 +80,8 @@ export interface ExecutionSummary {
   status: string;
   totalMs: number;
   eventCount: number;
+  provider?: string;
+  model?: string;
 }
 
 export interface AgentCard {

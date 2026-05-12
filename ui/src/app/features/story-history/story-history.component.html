@@ -74,6 +74,12 @@
                     </mat-checkbox>
                     <app-status-badge [status]="exec.status" />
                     <span class="exec-time">{{ exec.timestamp | date:'yyyy-MM-dd HH:mm' }}</span>
+                    @if (exec.model) {
+                      <span class="exec-model" [title]="(exec.provider ?? '') + ' · ' + exec.model">
+                        <mat-icon class="provider-icon">{{ exec.provider === 'bedrock' ? 'cloud' : 'computer' }}</mat-icon>
+                        {{ exec.model }}
+                      </span>
+                    }
                     <span class="exec-ms">{{ exec.totalMs | number:'1.0-0' }}ms</span>
                     <span class="exec-id" [title]="exec.executionId">
                       {{ exec.executionId | slice:5:17 }}…
