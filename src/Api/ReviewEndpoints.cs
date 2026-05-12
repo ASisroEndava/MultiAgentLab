@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using MultiAgentLab.Api.Application.Supervisor;
 using MultiAgentLab.Api.Domain;
 using MultiAgentLab.Api.Infrastructure.Logging;
@@ -198,7 +199,7 @@ public static class ReviewEndpoints
     }
 
     private static async Task<IResult> SemanticCompareAsync(
-        SemanticCompareRequest request,
+        [FromBody] SemanticCompareRequest request,
         IExecutionLogger logger,
         IModelRouter modelRouter,
         CancellationToken cancellationToken)
