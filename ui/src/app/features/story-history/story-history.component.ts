@@ -162,8 +162,9 @@ export class StoryHistoryComponent implements OnInit {
         this.comparing.set(false);
       },
       error: (err) => {
+        const e = err?.error;
         this.comparisonError.set(
-          err?.error?.message ?? 'Comparison failed — check provider settings or ensure executions belong to the same story.'
+          e?.detail ?? e?.message ?? e?.title ?? 'Comparison failed — check provider settings or ensure executions belong to the same story.'
         );
         this.comparing.set(false);
       },

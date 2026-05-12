@@ -1,6 +1,5 @@
 using System.Text;
 using System.Text.Json;
-using Microsoft.AspNetCore.Mvc;
 using MultiAgentLab.Api.Application.Supervisor;
 using MultiAgentLab.Api.Domain;
 using MultiAgentLab.Api.Infrastructure.Logging;
@@ -199,7 +198,7 @@ public static class ReviewEndpoints
     }
 
     private static async Task<IResult> SemanticCompareAsync(
-        [FromBody] SemanticCompareRequest request,
+        SemanticCompareRequest request,
         IExecutionLogger logger,
         IModelRouter modelRouter,
         CancellationToken cancellationToken)
@@ -244,10 +243,25 @@ public static class ReviewEndpoints
         var agentsA = resultA.InvokedAgents.ToHashSet();
         var agentsB = resultB.InvokedAgents.ToHashSet();
 
-        var semanticDiffs = await CallSemanticLlmAsync(
-            resultA.Issues, resultB.Issues,
-            resultA.Recommendations, resultB.Recommendations,
-            request.Provider, modelRouter, cancellationToken);
+        SemanticDiff issuesDiff, recsDiff;
+        try
+        {
+            (issuesDiff, recsDiff) = await CallSemanticLlmAsync(
+                resultA.Issues, resultB.Issues,
+                resultA.Recommendations, resultB.Recommendations,
+                request.Provider, modelRouter, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return Results.Problem(title: "Comparison cancelled", detail: "The request was cancelled.", statusCode: 499);
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(
+                title: "LLM call failed",
+                detail: ex.Message,
+                statusCode: 500);
+        }
 
         return Results.Ok(new SemanticComparisonResult
         {
@@ -255,8 +269,8 @@ public static class ReviewEndpoints
             Title           = snapshotA.Title,
             SnapshotA       = snapshotA,
             SnapshotB       = snapshotB,
-            Issues          = semanticDiffs.issues,
-            Recommendations = semanticDiffs.recommendations,
+            Issues          = issuesDiff,
+            Recommendations = recsDiff,
             AgentsOnlyInA   = agentsA.Except(agentsB).ToList(),
             AgentsOnlyInB   = agentsB.Except(agentsA).ToList(),
             AgentsInBoth    = agentsA.Intersect(agentsB).ToList()
@@ -306,8 +320,17 @@ public static class ReviewEndpoints
             }
             """;
 
-        var client   = modelRouter.Resolve(provider);
-        var response = await client.GenerateAsync(new ModelRequest { Prompt = prompt, Provider = provider }, ct);
+        var providerWithTokens = new ProviderSelection
+        {
+            Type        = provider.Type,
+            Model       = provider.Model,
+            Region      = provider.Region,
+            Endpoint    = provider.Endpoint,
+            Temperature = provider.Temperature,
+            MaxTokens   = provider.MaxTokens ?? 4096,
+        };
+        var client   = modelRouter.Resolve(providerWithTokens);
+        var response = await client.GenerateAsync(new ModelRequest { Prompt = prompt, Provider = providerWithTokens }, ct);
         return ParseSemanticResponse(response.Text, issuesA, issuesB, recsA, recsB);
     }
 
