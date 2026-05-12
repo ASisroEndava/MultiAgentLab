@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Amazon;
 using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
@@ -26,7 +27,7 @@ public sealed class BedrockClient : IModelClient
             : new AmazonBedrockRuntimeClient(region);
 
         var modelId = request.Provider.Model;
-        var payloadJson = BuildPayload(modelId, request);
+        var payloadJson = BuildPayload(StripRegionPrefix(modelId), request);
 
         var invokeRequest = new InvokeModelRequest
         {
@@ -43,7 +44,7 @@ public sealed class BedrockClient : IModelClient
 
         sw.Stop();
 
-        var (text, tokensUsed) = ExtractResponse(modelId, responseJson);
+        var (text, tokensUsed) = ExtractResponse(StripRegionPrefix(modelId), responseJson);
 
         return new ModelResponse
         {
@@ -52,6 +53,9 @@ public sealed class BedrockClient : IModelClient
             LatencyMs = sw.Elapsed.TotalMilliseconds
         };
     }
+
+    private static string StripRegionPrefix(string modelId) =>
+        Regex.Replace(modelId, @"^(us|eu|ap)\.", string.Empty);
 
     private static string BuildPayload(string modelId, ModelRequest request) => modelId switch
     {
