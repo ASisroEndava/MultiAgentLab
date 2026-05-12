@@ -3,11 +3,15 @@ import { DatePipe, DecimalPipe, SlicePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ComparisonResult, ExecutionSummary } from '../../core/models/api.models';
+import { ExecutionSummary, SemanticComparisonResult, SemanticCompareRequest } from '../../core/models/api.models';
 import { ReviewApiService } from '../../core/services/review-api.service';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { ComparisonPanelComponent } from '../comparison-panel/comparison-panel.component';
@@ -22,9 +26,10 @@ export interface StoryGroup {
   selector: 'app-story-history',
   standalone: true,
   imports: [
-    DatePipe, DecimalPipe, SlicePipe,
+    DatePipe, DecimalPipe, SlicePipe, FormsModule,
     MatCardModule, MatIconModule, MatButtonModule, MatTooltipModule,
     MatExpansionModule, MatCheckboxModule, MatProgressSpinnerModule,
+    MatSelectModule, MatInputModule, MatFormFieldModule,
     StatusBadgeComponent, ComparisonPanelComponent,
   ],
   templateUrl: './story-history.component.html',
@@ -39,10 +44,14 @@ export class StoryHistoryComponent implements OnInit {
 
   protected selected        = signal<Set<string>>(new Set());
   protected comparing       = signal(false);
-  protected comparisonResult = signal<ComparisonResult | null>(null);
+  protected comparisonResult = signal<SemanticComparisonResult | null>(null);
   protected comparisonError  = signal<string | null>(null);
 
-  protected readonly canCompare   = computed(() => this.selected().size === 2);
+  protected providerType = signal<'ollama' | 'bedrock'>('ollama');
+  protected model        = signal('qwen2.5:3b');
+  protected endpoint     = signal('http://localhost:11434');
+
+  protected readonly canCompare    = computed(() => this.selected().size === 2);
   protected readonly selectionCount = computed(() => this.selected().size);
 
   ngOnInit(): void {
@@ -89,14 +98,23 @@ export class StoryHistoryComponent implements OnInit {
     this.comparing.set(true);
     this.comparisonResult.set(null);
     this.comparisonError.set(null);
-    this.api.compareExecutions(a, b).subscribe({
+    const req: SemanticCompareRequest = {
+      a, b,
+      provider: {
+        type: this.providerType(),
+        model: this.model(),
+        endpoint: this.providerType() === 'ollama' ? this.endpoint() : undefined,
+        temperature: 0.1,
+      },
+    };
+    this.api.semanticCompareExecutions(req).subscribe({
       next: (result) => {
         this.comparisonResult.set(result);
         this.comparing.set(false);
       },
       error: (err) => {
         this.comparisonError.set(
-          err?.error?.message ?? 'Comparison failed — executions may belong to different stories.'
+          err?.error?.message ?? 'Comparison failed — check provider settings or ensure executions belong to the same story.'
         );
         this.comparing.set(false);
       },

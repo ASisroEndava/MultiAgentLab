@@ -16,13 +16,24 @@
           <span class="selection-hint">Select {{ 2 - selectionCount() }} more to compare</span>
         }
         @if (canCompare()) {
+          <div class="provider-inline">
+            <mat-form-field appearance="outline" class="inline-field">
+              <mat-select [ngModel]="providerType()" (ngModelChange)="providerType.set($event); model.set($event === 'bedrock' ? 'us.anthropic.claude-3-5-haiku-20241022-v1:0' : 'qwen2.5:3b')">
+                <mat-option value="ollama">Ollama</mat-option>
+                <mat-option value="bedrock">Bedrock</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="inline-field model-field">
+              <input matInput [ngModel]="model()" (ngModelChange)="model.set($event)" placeholder="model" />
+            </mat-form-field>
+          </div>
           <button mat-raised-button color="accent" (click)="compare()" [disabled]="comparing()">
             @if (comparing()) {
               <mat-spinner diameter="16" color="accent"></mat-spinner>
             } @else {
-              <mat-icon>compare</mat-icon>
+              <mat-icon>auto_awesome</mat-icon>
             }
-            Compare
+            Semantic Compare
           </button>
         }
         @if (selectionCount() > 0) {

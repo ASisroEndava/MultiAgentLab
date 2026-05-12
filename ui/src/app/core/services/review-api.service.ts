@@ -10,6 +10,8 @@ import {
   ProvidersStatus,
   ReviewRequest,
   ReviewResult,
+  SemanticCompareRequest,
+  SemanticComparisonResult,
   StartCaseResponse,
 } from '../models/api.models';
 
@@ -62,5 +64,13 @@ export class ReviewApiService {
     return this.http.get<ComparisonResult>(`${this.base}/executions/compare`, {
       params: { a, b },
     });
+  }
+
+  getExecutionResult(executionId: string): Observable<ReviewResult> {
+    return this.http.get<ReviewResult>(`${this.base}/executions/${executionId}/result`);
+  }
+
+  semanticCompareExecutions(req: SemanticCompareRequest): Observable<SemanticComparisonResult> {
+    return this.http.post<SemanticComparisonResult>(`${this.base}/executions/compare/semantic`, req);
   }
 }

@@ -50,8 +50,18 @@
 
     <mat-tab>
       <ng-template mat-tab-label>
-        <mat-icon class="tab-icon">manage_history</mat-icon>
-        History &amp; Compare
+        <mat-icon class="tab-icon">history</mat-icon>
+        History
+      </ng-template>
+      <div class="history-panel">
+        <app-execution-history />
+      </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">compare_arrows</mat-icon>
+        Compare User Stories
       </ng-template>
       <div class="history-panel">
         <app-story-history />

@@ -1,8 +1,10 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using MultiAgentLab.Api.Application.Supervisor;
 using MultiAgentLab.Api.Domain;
 using MultiAgentLab.Api.Infrastructure.Logging;
+using MultiAgentLab.Api.Infrastructure.LLM;
 using MultiAgentLab.Api.Infrastructure.Mocks;
 
 namespace MultiAgentLab.Api;
@@ -58,6 +60,14 @@ public static class ReviewEndpoints
 
         app.MapGet("/executions/compare", CompareExecutionsAsync)
            .WithName("CompareExecutions")
+           .WithOpenApi();
+
+        app.MapPost("/executions/compare/semantic", SemanticCompareAsync)
+           .WithName("SemanticCompare")
+           .WithOpenApi();
+
+        app.MapGet("/executions/{executionId}/result", GetExecutionResultAsync)
+           .WithName("GetExecutionResult")
            .WithOpenApi();
 
         app.MapGet("/providers/status", GetProvidersStatusAsync)
@@ -175,6 +185,189 @@ public static class ReviewEndpoints
             AgentsOnlyInB          = agentsB.Except(agentsA).ToList(),
             AgentsInBoth           = agentsA.Intersect(agentsB).ToList()
         });
+    }
+
+    private static async Task<IResult> GetExecutionResultAsync(
+        string executionId,
+        IExecutionLogger logger,
+        CancellationToken cancellationToken)
+    {
+        var result = await logger.GetFinalResultAsync(executionId, cancellationToken);
+        return result is null
+            ? Results.NotFound(new { message = $"Execution '{executionId}' has no final result yet." })
+            : Results.Ok(result);
+    }
+
+    private static async Task<IResult> SemanticCompareAsync(
+        [FromBody] SemanticCompareRequest request,
+        IExecutionLogger logger,
+        IModelRouter modelRouter,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.A) || string.IsNullOrWhiteSpace(request.B))
+            return Results.BadRequest(new { message = "Both 'a' and 'b' execution IDs are required." });
+
+        var (resultA, logsA) = await GetResultWithLogsAsync(logger, request.A, cancellationToken);
+        var (resultB, logsB) = await GetResultWithLogsAsync(logger, request.B, cancellationToken);
+
+        if (resultA is null) return Results.NotFound(new { message = $"Execution '{request.A}' not found." });
+        if (resultB is null) return Results.NotFound(new { message = $"Execution '{request.B}' not found." });
+
+        var reqDataA   = (logsA.FirstOrDefault(l => l.EventType == "request_received")?.Data as JsonElement?) ?? default;
+        var reqDataB   = (logsB.FirstOrDefault(l => l.EventType == "request_received")?.Data as JsonElement?) ?? default;
+        var finalDataA = (logsA.LastOrDefault(l => l.EventType == "final_result_generated")?.Data as JsonElement?) ?? default;
+        var finalDataB = (logsB.LastOrDefault(l => l.EventType == "final_result_generated")?.Data as JsonElement?) ?? default;
+
+        var snapshotA = new ExecutionSnapshot
+        {
+            ExecutionId   = request.A,
+            Timestamp     = logsA.FirstOrDefault(l => l.EventType == "request_received")?.Timestamp.ToString("o") ?? "",
+            StoryId       = GetJsonString(reqDataA, "storyId") ?? "",
+            Title         = GetJsonString(reqDataA, "title") ?? request.A,
+            Provider      = GetJsonString(finalDataA, "provider") ?? "",
+            Model         = GetJsonString(finalDataA, "model") ?? "",
+            Status        = GetJsonString(finalDataA, "status") ?? "unknown",
+            InvokedAgents = GetJsonStringList(finalDataA, "invokedAgents")
+        };
+        var snapshotB = new ExecutionSnapshot
+        {
+            ExecutionId   = request.B,
+            Timestamp     = logsB.FirstOrDefault(l => l.EventType == "request_received")?.Timestamp.ToString("o") ?? "",
+            StoryId       = GetJsonString(reqDataB, "storyId") ?? "",
+            Title         = GetJsonString(reqDataB, "title") ?? request.B,
+            Provider      = GetJsonString(finalDataB, "provider") ?? "",
+            Model         = GetJsonString(finalDataB, "model") ?? "",
+            Status        = GetJsonString(finalDataB, "status") ?? "unknown",
+            InvokedAgents = GetJsonStringList(finalDataB, "invokedAgents")
+        };
+
+        var agentsA = resultA.InvokedAgents.ToHashSet();
+        var agentsB = resultB.InvokedAgents.ToHashSet();
+
+        var semanticDiffs = await CallSemanticLlmAsync(
+            resultA.Issues, resultB.Issues,
+            resultA.Recommendations, resultB.Recommendations,
+            request.Provider, modelRouter, cancellationToken);
+
+        return Results.Ok(new SemanticComparisonResult
+        {
+            StoryId         = snapshotA.StoryId,
+            Title           = snapshotA.Title,
+            SnapshotA       = snapshotA,
+            SnapshotB       = snapshotB,
+            Issues          = semanticDiffs.issues,
+            Recommendations = semanticDiffs.recommendations,
+            AgentsOnlyInA   = agentsA.Except(agentsB).ToList(),
+            AgentsOnlyInB   = agentsB.Except(agentsA).ToList(),
+            AgentsInBoth    = agentsA.Intersect(agentsB).ToList()
+        });
+    }
+
+    private static async Task<(SemanticDiff issues, SemanticDiff recommendations)> CallSemanticLlmAsync(
+        List<string> issuesA, List<string> issuesB,
+        List<string> recsA,   List<string> recsB,
+        ProviderSelection provider, IModelRouter modelRouter,
+        CancellationToken ct)
+    {
+        static string ListItems(List<string> items) =>
+            items.Count == 0 ? "(none)" : string.Join("\n", items.Select((x, i) => $"{i + 1}. {x}"));
+
+        var prompt = $$"""
+            You are a semantic similarity analyzer for user story reviews.
+            Two reviews were performed independently on the same user story.
+            Identify which items express the same quality concern (even in different words),
+            and which are unique to each review.
+
+            ISSUES from Review A:
+            {{ListItems(issuesA)}}
+
+            ISSUES from Review B:
+            {{ListItems(issuesB)}}
+
+            RECOMMENDATIONS from Review A:
+            {{ListItems(recsA)}}
+
+            RECOMMENDATIONS from Review B:
+            {{ListItems(recsB)}}
+
+            IMPORTANT: Output ONLY a valid JSON object — no markdown fences, no comments.
+            Use the exact original text for each item. Each item must appear in exactly one group.
+            {
+              "issues": {
+                "similar": [{"a": "<text from A>", "b": "<text from B>"}, ...],
+                "onlyInA": ["<text>", ...],
+                "onlyInB": ["<text>", ...]
+              },
+              "recommendations": {
+                "similar": [{"a": "<text from A>", "b": "<text from B>"}, ...],
+                "onlyInA": ["<text>", ...],
+                "onlyInB": ["<text>", ...]
+              }
+            }
+            """;
+
+        var client   = modelRouter.Resolve(provider);
+        var response = await client.GenerateAsync(new ModelRequest { Prompt = prompt, Provider = provider }, ct);
+        return ParseSemanticResponse(response.Text, issuesA, issuesB, recsA, recsB);
+    }
+
+    private static readonly System.Text.Json.JsonDocumentOptions _lenientOpts = new()
+    {
+        AllowTrailingCommas = true,
+        CommentHandling = System.Text.Json.JsonCommentHandling.Skip
+    };
+
+    private static (SemanticDiff issues, SemanticDiff recommendations) ParseSemanticResponse(
+        string responseText,
+        List<string> issuesA, List<string> issuesB,
+        List<string> recsA,   List<string> recsB)
+    {
+        try
+        {
+            var s = responseText.IndexOf('{');
+            var e = responseText.LastIndexOf('}');
+            if (s >= 0)
+            {
+                var json = e > s ? responseText[s..(e + 1)] : responseText[s..];
+                using var doc = System.Text.Json.JsonDocument.Parse(json, _lenientOpts);
+                var root = doc.RootElement;
+                return (
+                    ParseSemanticDiff(root, "issues"),
+                    ParseSemanticDiff(root, "recommendations")
+                );
+            }
+        }
+        catch { }
+
+        return (
+            new SemanticDiff { OnlyInA = issuesA, OnlyInB = issuesB },
+            new SemanticDiff { OnlyInA = recsA,   OnlyInB = recsB }
+        );
+    }
+
+    private static SemanticDiff ParseSemanticDiff(System.Text.Json.JsonElement root, string key)
+    {
+        if (!root.TryGetProperty(key, out var section)) return new SemanticDiff();
+
+        var similar = new List<SemanticPair>();
+        if (section.TryGetProperty("similar", out var sim) && sim.ValueKind == System.Text.Json.JsonValueKind.Array)
+            foreach (var item in sim.EnumerateArray())
+                if (item.TryGetProperty("a", out var a) && item.TryGetProperty("b", out var b))
+                    similar.Add(new SemanticPair { A = a.GetString() ?? "", B = b.GetString() ?? "" });
+
+        return new SemanticDiff
+        {
+            Similar  = similar,
+            OnlyInA  = ExtractStringArray(section, "onlyInA"),
+            OnlyInB  = ExtractStringArray(section, "onlyInB")
+        };
+    }
+
+    private static List<string> ExtractStringArray(System.Text.Json.JsonElement el, string key)
+    {
+        if (!el.TryGetProperty(key, out var arr) || arr.ValueKind != System.Text.Json.JsonValueKind.Array)
+            return [];
+        return arr.EnumerateArray().Select(x => x.GetString() ?? "").Where(x => x.Length > 0).ToList();
     }
 
     private static async Task<(ReviewResult? result, List<ExecutionLogEvent> logs)> GetResultWithLogsAsync(

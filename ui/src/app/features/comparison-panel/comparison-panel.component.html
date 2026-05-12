@@ -1,7 +1,7 @@
 <mat-card class="panel">
   <mat-card-header>
     <mat-card-title>
-      <mat-icon>compare</mat-icon> Comparison — {{ result().title }}
+      <mat-icon>compare</mat-icon> Semantic Comparison — {{ result().title }}
     </mat-card-title>
     <span class="story-chip">{{ result().storyId }}</span>
   </mat-card-header>
@@ -32,36 +32,42 @@
     @if (isIdentical()) {
       <div class="identical-banner">
         <mat-icon>check_circle</mat-icon>
-        Both reviews produced identical issues and recommendations.
+        Both reviews raised the same issues and recommendations (semantically equivalent).
       </div>
     }
 
-    <!-- Issues diff -->
+    <!-- Issues -->
     <div class="diff-section">
       <div class="diff-title"><mat-icon>warning</mat-icon> Issues</div>
-      <div class="diff-columns">
-        <div class="diff-col col-a">
-          <div class="col-header">Only in A ({{ result().issuesOnlyInA.length }})</div>
-          @if (result().issuesOnlyInA.length === 0) {
-            <div class="empty-col">—</div>
-          } @else {
-            <ul>@for (i of result().issuesOnlyInA; track $index) { <li>{{ i }}</li> }</ul>
+
+      @if (result().issues.similar.length > 0) {
+        <div class="similar-block">
+          <div class="similar-header"><mat-icon>compare_arrows</mat-icon> Semantically similar ({{ result().issues.similar.length }})</div>
+          @for (pair of result().issues.similar; track $index) {
+            <div class="similar-pair">
+              <span class="pair-side side-a">{{ pair.a }}</span>
+              <mat-icon class="pair-arrow">compare_arrows</mat-icon>
+              <span class="pair-side side-b">{{ pair.b }}</span>
+            </div>
           }
         </div>
-        <div class="diff-col col-both">
-          <div class="col-header">In both ({{ result().issuesInBoth.length }})</div>
-          @if (result().issuesInBoth.length === 0) {
+      }
+
+      <div class="diff-columns">
+        <div class="diff-col col-a">
+          <div class="col-header">Only in A ({{ result().issues.onlyInA.length }})</div>
+          @if (result().issues.onlyInA.length === 0) {
             <div class="empty-col">—</div>
           } @else {
-            <ul>@for (i of result().issuesInBoth; track $index) { <li>{{ i }}</li> }</ul>
+            <ul>@for (i of result().issues.onlyInA; track $index) { <li>{{ i }}</li> }</ul>
           }
         </div>
         <div class="diff-col col-b">
-          <div class="col-header">Only in B ({{ result().issuesOnlyInB.length }})</div>
-          @if (result().issuesOnlyInB.length === 0) {
+          <div class="col-header">Only in B ({{ result().issues.onlyInB.length }})</div>
+          @if (result().issues.onlyInB.length === 0) {
             <div class="empty-col">—</div>
           } @else {
-            <ul>@for (i of result().issuesOnlyInB; track $index) { <li>{{ i }}</li> }</ul>
+            <ul>@for (i of result().issues.onlyInB; track $index) { <li>{{ i }}</li> }</ul>
           }
         </div>
       </div>
@@ -69,32 +75,38 @@
 
     <mat-divider></mat-divider>
 
-    <!-- Recommendations diff -->
+    <!-- Recommendations -->
     <div class="diff-section">
       <div class="diff-title"><mat-icon>lightbulb</mat-icon> Recommendations</div>
-      <div class="diff-columns">
-        <div class="diff-col col-a">
-          <div class="col-header">Only in A ({{ result().recommendationsOnlyInA.length }})</div>
-          @if (result().recommendationsOnlyInA.length === 0) {
-            <div class="empty-col">—</div>
-          } @else {
-            <ul>@for (i of result().recommendationsOnlyInA; track $index) { <li>{{ i }}</li> }</ul>
+
+      @if (result().recommendations.similar.length > 0) {
+        <div class="similar-block">
+          <div class="similar-header"><mat-icon>compare_arrows</mat-icon> Semantically similar ({{ result().recommendations.similar.length }})</div>
+          @for (pair of result().recommendations.similar; track $index) {
+            <div class="similar-pair">
+              <span class="pair-side side-a">{{ pair.a }}</span>
+              <mat-icon class="pair-arrow">compare_arrows</mat-icon>
+              <span class="pair-side side-b">{{ pair.b }}</span>
+            </div>
           }
         </div>
-        <div class="diff-col col-both">
-          <div class="col-header">In both ({{ result().recommendationsInBoth.length }})</div>
-          @if (result().recommendationsInBoth.length === 0) {
+      }
+
+      <div class="diff-columns">
+        <div class="diff-col col-a">
+          <div class="col-header">Only in A ({{ result().recommendations.onlyInA.length }})</div>
+          @if (result().recommendations.onlyInA.length === 0) {
             <div class="empty-col">—</div>
           } @else {
-            <ul>@for (i of result().recommendationsInBoth; track $index) { <li>{{ i }}</li> }</ul>
+            <ul>@for (i of result().recommendations.onlyInA; track $index) { <li>{{ i }}</li> }</ul>
           }
         </div>
         <div class="diff-col col-b">
-          <div class="col-header">Only in B ({{ result().recommendationsOnlyInB.length }})</div>
-          @if (result().recommendationsOnlyInB.length === 0) {
+          <div class="col-header">Only in B ({{ result().recommendations.onlyInB.length }})</div>
+          @if (result().recommendations.onlyInB.length === 0) {
             <div class="empty-col">—</div>
           } @else {
-            <ul>@for (i of result().recommendationsOnlyInB; track $index) { <li>{{ i }}</li> }</ul>
+            <ul>@for (i of result().recommendations.onlyInB; track $index) { <li>{{ i }}</li> }</ul>
           }
         </div>
       </div>
@@ -102,38 +114,29 @@
 
     <mat-divider></mat-divider>
 
-    <!-- Agents diff -->
+    <!-- Agents -->
     <div class="diff-section">
       <div class="diff-title"><mat-icon>smart_toy</mat-icon> Agents</div>
       <div class="diff-columns agents-row">
         <div class="diff-col col-a">
           <div class="col-header">Only in A</div>
           <div class="agent-chips">
-            @if (result().agentsOnlyInA.length === 0) {
-              <span class="empty-col">—</span>
-            } @else {
-              @for (a of result().agentsOnlyInA; track a) { <span class="agent-chip chip-a">{{ a }}</span> }
-            }
+            @if (result().agentsOnlyInA.length === 0) { <span class="empty-col">—</span> }
+            @else { @for (a of result().agentsOnlyInA; track a) { <span class="agent-chip chip-a">{{ a }}</span> } }
           </div>
         </div>
         <div class="diff-col col-both">
           <div class="col-header">In both</div>
           <div class="agent-chips">
-            @if (result().agentsInBoth.length === 0) {
-              <span class="empty-col">—</span>
-            } @else {
-              @for (a of result().agentsInBoth; track a) { <span class="agent-chip chip-both">{{ a }}</span> }
-            }
+            @if (result().agentsInBoth.length === 0) { <span class="empty-col">—</span> }
+            @else { @for (a of result().agentsInBoth; track a) { <span class="agent-chip chip-both">{{ a }}</span> } }
           </div>
         </div>
         <div class="diff-col col-b">
           <div class="col-header">Only in B</div>
           <div class="agent-chips">
-            @if (result().agentsOnlyInB.length === 0) {
-              <span class="empty-col">—</span>
-            } @else {
-              @for (a of result().agentsOnlyInB; track a) { <span class="agent-chip chip-b">{{ a }}</span> }
-            }
+            @if (result().agentsOnlyInB.length === 0) { <span class="empty-col">—</span> }
+            @else { @for (a of result().agentsOnlyInB; track a) { <span class="agent-chip chip-b">{{ a }}</span> } }
           </div>
         </div>
       </div>

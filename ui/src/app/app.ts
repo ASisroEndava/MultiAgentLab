@@ -9,6 +9,7 @@ import { EventTimelineComponent } from './features/event-timeline/event-timeline
 import { FinalResultComponent } from './features/final-result/final-result.component';
 import { HistoryInputComponent, SubmitEvent } from './features/history-input/history-input.component';
 import { StoryHistoryComponent } from './features/story-history/story-history.component';
+import { ExecutionHistoryComponent } from './features/execution-history/execution-history.component';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +18,7 @@ import { StoryHistoryComponent } from './features/story-history/story-history.co
     MatToolbarModule, MatIconModule, MatTooltipModule, MatTabsModule,
     HistoryInputComponent, DecisionPanelComponent,
     EventTimelineComponent, FinalResultComponent, StoryHistoryComponent,
+    ExecutionHistoryComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',

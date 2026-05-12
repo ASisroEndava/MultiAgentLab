@@ -112,6 +112,35 @@ export interface ExecutionSnapshot {
   invokedAgents: string[];
 }
 
+export interface SemanticPair {
+  a: string;
+  b: string;
+}
+
+export interface SemanticDiff {
+  similar: SemanticPair[];
+  onlyInA: string[];
+  onlyInB: string[];
+}
+
+export interface SemanticComparisonResult {
+  storyId: string;
+  title: string;
+  snapshotA: ExecutionSnapshot;
+  snapshotB: ExecutionSnapshot;
+  issues: SemanticDiff;
+  recommendations: SemanticDiff;
+  agentsOnlyInA: string[];
+  agentsOnlyInB: string[];
+  agentsInBoth: string[];
+}
+
+export interface SemanticCompareRequest {
+  a: string;
+  b: string;
+  provider: ProviderSelection;
+}
+
 export interface ComparisonResult {
   storyId: string;
   title: string;

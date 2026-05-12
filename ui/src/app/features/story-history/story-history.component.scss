@@ -79,6 +79,16 @@
   cursor: help; margin-left: auto;
 }
 
+.provider-inline {
+  display: flex; align-items: center; gap: 0.25rem;
+  .inline-field {
+    height: 36px;
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+    ::ng-deep .mat-mdc-text-field-wrapper { padding: 0 0.5rem; }
+  }
+  .model-field { width: 180px; }
+}
+
 .comparison-error {
   display: flex; align-items: center; gap: 0.5rem;
   padding: 0.75rem 1rem; border-radius: 8px;
