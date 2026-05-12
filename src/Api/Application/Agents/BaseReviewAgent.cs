@@ -75,12 +75,21 @@ public abstract class BaseReviewAgent : IReviewAgent
         {
             var jsonStart = responseText.IndexOf('{');
             var jsonEnd = responseText.LastIndexOf('}');
-// 
-            if (jsonStart >= 0 && jsonEnd > jsonStart)
-            {
-                var jsonStr = responseText[jsonStart..(jsonEnd + 1)];
 
-                var doc = TryParseJson(jsonStr) ?? TryParseJson(RepairJson(jsonStr));
+            // For truncated responses the closing braces may be missing;
+            // use the full text from the first '{' even if '}' is absent.
+            var jsonStr = jsonStart >= 0
+                ? (jsonEnd > jsonStart
+                    ? responseText[jsonStart..(jsonEnd + 1)]
+                    : responseText[jsonStart..])
+                : string.Empty;
+
+            if (jsonStr.Length > 0)
+            {
+                var doc = TryParseJson(jsonStr)
+                       ?? TryParseJson(RepairJson(jsonStr))
+                       ?? TryParseJson(TryCompleteJson(jsonStr))
+                       ?? TryParseJson(RepairJson(TryCompleteJson(jsonStr)));
 
                 if (doc != null)
                 {
@@ -158,6 +167,33 @@ public abstract class BaseReviewAgent : IReviewAgent
         repaired = FixUnescapedQuotes(repaired);
 
         return repaired;
+    }
+
+    private static string TryCompleteJson(string json)
+    {
+        var sb = new StringBuilder(json.TrimEnd());
+        var stack = new Stack<char>();
+        bool inString = false;
+        bool escaped = false;
+
+        foreach (char c in json)
+        {
+            if (escaped) { escaped = false; continue; }
+            if (c == '\\' && inString) { escaped = true; continue; }
+            if (c == '"') { inString = !inString; continue; }
+            if (inString) continue;
+
+            if (c == '{' || c == '[') stack.Push(c);
+            else if (c == '}' && stack.Count > 0 && stack.Peek() == '{') stack.Pop();
+            else if (c == ']' && stack.Count > 0 && stack.Peek() == '[') stack.Pop();
+        }
+
+        if (inString) sb.Append('"');
+
+        while (stack.Count > 0)
+            sb.Append(stack.Pop() == '{' ? '}' : ']');
+
+        return sb.ToString();
     }
 
     private static string FixNewlinesInStrings(string json)
