@@ -62,6 +62,15 @@ public sealed class BedrockClient : IModelClient
             temperature = request.Provider.Temperature,
             messages = new[] { new { role = "user", content = request.Prompt } }
         }),
+        var m when m.StartsWith("amazon.nova") => JsonSerializer.Serialize(new
+        {
+            messages = new[] { new { role = "user", content = new[] { new { text = request.Prompt } } } },
+            inferenceConfig = new
+            {
+                maxTokens = request.Provider.MaxTokens ?? 8192,
+                temperature = request.Provider.Temperature,
+            }
+        }),
         var m when m.StartsWith("amazon.titan-text") => JsonSerializer.Serialize(new
         {
             inputText = request.Prompt,
@@ -110,6 +119,25 @@ public sealed class BedrockClient : IModelClient
             {
                 tokens += usage.TryGetProperty("input_tokens", out var i) ? i.GetInt32() : 0;
                 tokens += usage.TryGetProperty("output_tokens", out var o) ? o.GetInt32() : 0;
+            }
+            return (text, tokens);
+        }
+
+        if (modelId.StartsWith("amazon.nova"))
+        {
+            var text = "";
+            if (root.TryGetProperty("output", out var output)
+                && output.TryGetProperty("message", out var message)
+                && message.TryGetProperty("content", out var content))
+            {
+                text = content.EnumerateArray().FirstOrDefault()
+                    .TryGetProperty("text", out var t) ? t.GetString() ?? "" : "";
+            }
+            var tokens = 0;
+            if (root.TryGetProperty("usage", out var usage))
+            {
+                tokens += usage.TryGetProperty("inputTokens", out var i) ? i.GetInt32() : 0;
+                tokens += usage.TryGetProperty("outputTokens", out var o) ? o.GetInt32() : 0;
             }
             return (text, tokens);
         }
