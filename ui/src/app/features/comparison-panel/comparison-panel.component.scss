@@ -65,6 +65,7 @@
 
 .diff-columns {
   display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+  &.agents-row { grid-template-columns: 1fr 1fr 1fr; }
 }
 .diff-col { display: flex; flex-direction: column; gap: 0.375rem; }
 .col-header {
