@@ -11,7 +11,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ExecutionSummary, SemanticComparisonResult, SemanticCompareRequest } from '../../core/models/api.models';
+import { ExecutionSummary, ProvidersStatus, SemanticComparisonResult, SemanticCompareRequest } from '../../core/models/api.models';
 import { ReviewApiService } from '../../core/services/review-api.service';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { ComparisonPanelComponent } from '../comparison-panel/comparison-panel.component';
@@ -47,15 +47,64 @@ export class StoryHistoryComponent implements OnInit {
   protected comparisonResult = signal<SemanticComparisonResult | null>(null);
   protected comparisonError  = signal<string | null>(null);
 
-  protected providerType = signal<'ollama' | 'bedrock'>('ollama');
-  protected model        = signal('qwen2.5:3b');
-  protected endpoint     = signal('http://localhost:11434');
+  protected providerType       = signal<'ollama' | 'bedrock'>('ollama');
+  protected model               = signal('qwen2.5:3b');
+  protected endpoint            = signal('http://localhost:11434');
+  protected ollamaModels        = signal<string[]>(['qwen2.5:3b']);
+  protected ollamaModelsLoading = signal(false);
+  protected readonly bedrockModels = [
+    'us.anthropic.claude-3-5-haiku-20241022-v1:0',
+    'us.anthropic.claude-3-5-sonnet-20241022-v2:0',
+    'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
+    'us.amazon.nova-micro-v1:0',
+    'us.amazon.nova-lite-v1:0',
+    'us.amazon.nova-pro-v1:0',
+    'us.meta.llama3-1-8b-instruct-v1:0',
+    'us.meta.llama3-1-70b-instruct-v1:0',
+    'us.meta.llama3-3-70b-instruct-v1:0',
+    'us.mistral.mistral-large-2402-v1:0',
+  ];
+  protected readonly providersStatus = signal<ProvidersStatus>({ ollama: true, bedrock: false });
+
+  protected get availableModels(): string[] {
+    return this.providerType() === 'bedrock' ? this.bedrockModels : this.ollamaModels();
+  }
 
   protected readonly canCompare    = computed(() => this.selected().size === 2);
   protected readonly selectionCount = computed(() => this.selected().size);
 
   ngOnInit(): void {
     this.load();
+    this.api.getProvidersStatus().subscribe({
+      next: (status) => this.providersStatus.set(status),
+    });
+    this.fetchOllamaModels();
+  }
+
+  protected onProviderChange(): void {
+    if (this.providerType() === 'ollama') this.fetchOllamaModels();
+    const models = this.availableModels;
+    if (!models.includes(this.model())) {
+      this.model.set(models[0] ?? '');
+    }
+  }
+
+  protected onEndpointBlur(): void {
+    if (this.providerType() === 'ollama') this.fetchOllamaModels();
+  }
+
+  private fetchOllamaModels(): void {
+    this.ollamaModelsLoading.set(true);
+    this.api.getOllamaModels(this.endpoint()).subscribe({
+      next: (models) => {
+        this.ollamaModels.set(models.length > 0 ? models : ['qwen2.5:3b']);
+        if (!this.ollamaModels().includes(this.model())) {
+          this.model.set(this.ollamaModels()[0]);
+        }
+        this.ollamaModelsLoading.set(false);
+      },
+      error: () => this.ollamaModelsLoading.set(false),
+    });
   }
 
   protected load(): void {

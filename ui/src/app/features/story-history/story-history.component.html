@@ -16,17 +16,6 @@
           <span class="selection-hint">Select {{ 2 - selectionCount() }} more to compare</span>
         }
         @if (canCompare()) {
-          <div class="provider-inline">
-            <mat-form-field appearance="outline" class="inline-field">
-              <mat-select [ngModel]="providerType()" (ngModelChange)="providerType.set($event); model.set($event === 'bedrock' ? 'us.anthropic.claude-3-5-haiku-20241022-v1:0' : 'qwen2.5:3b')">
-                <mat-option value="ollama">Ollama</mat-option>
-                <mat-option value="bedrock">Bedrock</mat-option>
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="inline-field model-field">
-              <input matInput [ngModel]="model()" (ngModelChange)="model.set($event)" placeholder="model" />
-            </mat-form-field>
-          </div>
           <button mat-raised-button color="accent" (click)="compare()" [disabled]="comparing()">
             @if (comparing()) {
               <mat-spinner diameter="16" color="accent"></mat-spinner>
@@ -45,6 +34,41 @@
     </mat-card-header>
 
     <mat-card-content>
+      <!-- Provider config for semantic comparison -->
+      <div class="provider-config">
+        <div class="provider-config-title"><mat-icon>smart_toy</mat-icon> LLM for semantic analysis</div>
+        <div class="row-fields">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Provider</mat-label>
+            <mat-select [ngModel]="providerType()" (ngModelChange)="providerType.set($event); onProviderChange()">
+              <mat-option value="ollama">Ollama</mat-option>
+              <mat-option value="bedrock"
+                [disabled]="!providersStatus().bedrock"
+                [matTooltip]="!providersStatus().bedrock ? 'AWS credentials not configured on the server' : ''">
+                Bedrock{{ !providersStatus().bedrock ? ' (not configured)' : '' }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Model</mat-label>
+            <mat-select [ngModel]="model()" (ngModelChange)="model.set($event)"
+              [disabled]="ollamaModelsLoading() && providerType() === 'ollama'">
+              @for (m of availableModels; track m) {
+                <mat-option [value]="m">{{ m }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        @if (providerType() === 'ollama') {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Ollama endpoint</mat-label>
+            <input matInput [ngModel]="endpoint()" (ngModelChange)="endpoint.set($event)" (blur)="onEndpointBlur()" />
+          </mat-form-field>
+        }
+      </div>
+
       @if (loading()) {
         <div class="center-state">
           <mat-spinner diameter="28"></mat-spinner>
