@@ -28,7 +28,7 @@ public sealed class BedrockClient : IModelClient
         var payload = new
         {
             anthropic_version = "bedrock-2023-05-31",
-            max_tokens = request.Provider.MaxTokens ?? 4096,
+            max_tokens = request.Provider.MaxTokens ?? 8192,
             temperature = request.Provider.Temperature,
             messages = new[]
             {
