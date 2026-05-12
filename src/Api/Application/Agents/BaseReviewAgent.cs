@@ -58,12 +58,13 @@ public abstract class BaseReviewAgent : IReviewAgent
                 ID: {{context.StoryId}}
                 Text: {{context.StoryText}}
 
-                Respond exclusively in JSON with this format:
+                IMPORTANT: Output ONLY a valid JSON object — no markdown fences, no comments, no explanation before or after.
+                Use exactly this structure (all fields required):
                 {
-                  "issues": [],
-                  "recommendations": [],
-                  "questions": [],
-                  "rawSummary": ""
+                  "issues": ["string", ...],
+                  "recommendations": ["string", ...],
+                  "questions": ["string", ...],
+                  "rawSummary": "string"
                 }
                 """;
     }
@@ -119,11 +120,17 @@ public abstract class BaseReviewAgent : IReviewAgent
         };
     }
 
+    private static readonly JsonDocumentOptions _lenientOptions = new()
+    {
+        AllowTrailingCommas = true,
+        CommentHandling = JsonCommentHandling.Skip,
+    };
+
     private static JsonDocument? TryParseJson(string json)
     {
         try
         {
-            return JsonDocument.Parse(json);
+            return JsonDocument.Parse(json, _lenientOptions);
         }
         catch
         {
@@ -143,6 +150,9 @@ public abstract class BaseReviewAgent : IReviewAgent
         repaired = Regex.Replace(repaired, @"\}(\s*\n\s*)\{", @"},${1}{");
         repaired = Regex.Replace(repaired, @"\}(\s*\n\s*)""", @"},${1}""");
         repaired = Regex.Replace(repaired, @"\](\s*\n\s*)""", @"],${1}""");
+
+        // Remove trailing commas before closing brace/bracket (fallback for strict parsers)
+        repaired = Regex.Replace(repaired, @",(\s*[}\]])", "$1");
 
         // Fix unescaped double quotes inside string values (e.g. a "word" inside a string)
         repaired = FixUnescapedQuotes(repaired);
