@@ -1,0 +1,94 @@
+:host { display: block; }
+
+.panel {
+  width: 100%;
+  mat-card-header {
+    display: flex; align-items: center; justify-content: space-between; padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;
+  }
+  mat-card-title { display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; }
+  mat-card-content { padding-top: 0.75rem; display: flex; flex-direction: column; gap: 1rem; }
+}
+
+.story-chip {
+  font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 999px;
+  background: rgba(148,163,184,0.12); color: #94a3b8; font-family: monospace;
+}
+
+.snapshots-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+}
+.snapshot-card {
+  border-radius: 8px; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.375rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+}
+.snap-a { border-left: 3px solid #f97316; }
+.snap-b { border-left: 3px solid #60a5fa; }
+.snap-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mat-sys-outline); }
+.snap-meta  { font-size: 0.78rem; color: var(--mat-sys-on-surface); }
+.snap-model { font-size: 0.75rem; color: #60a5fa; font-family: monospace; }
+.snap-id    { font-size: 0.68rem; color: var(--mat-sys-outline); font-family: monospace; cursor: help; }
+
+.identical-banner {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.625rem 1rem; border-radius: 8px;
+  background: rgba(74,222,128,0.1); color: #4ade80; font-size: 0.85rem;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+.diff-section {
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.diff-title {
+  display: flex; align-items: center; gap: 0.375rem;
+  font-size: 0.8rem; font-weight: 600; color: var(--mat-sys-outline);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+}
+.similar-block {
+  background: rgba(167,139,250,0.06); border: 1px solid rgba(167,139,250,0.2);
+  border-radius: 8px; padding: 0.625rem 0.875rem; display: flex; flex-direction: column; gap: 0.5rem;
+}
+.similar-header {
+  display: flex; align-items: center; gap: 0.375rem;
+  font-size: 0.72rem; font-weight: 600; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.05em;
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+}
+.similar-pair {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 0.5rem;
+}
+.pair-side {
+  font-size: 0.78rem; line-height: 1.5; padding: 0.25rem 0.5rem; border-radius: 4px;
+}
+.side-a { background: rgba(249,115,22,0.08); color: var(--mat-sys-on-surface); border-left: 2px solid #f97316; }
+.side-b { background: rgba(96,165,250,0.08); color: var(--mat-sys-on-surface); border-left: 2px solid #60a5fa; }
+.pair-arrow { font-size: 14px; width: 14px; height: 14px; color: #a78bfa; margin-top: 0.3rem; }
+
+.diff-columns {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+  &.agents-row { grid-template-columns: 1fr 1fr 1fr; }
+}
+.diff-col { display: flex; flex-direction: column; gap: 0.375rem; }
+.col-header {
+  font-size: 0.72rem; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 4px;
+  text-align: center;
+}
+.col-a    .col-header { background: rgba(249,115,22,0.12);  color: #f97316; }
+.col-both .col-header { background: rgba(148,163,184,0.1);  color: #94a3b8; }
+.col-b    .col-header { background: rgba(96,165,250,0.12);  color: #60a5fa; }
+
+.empty-col { font-size: 0.78rem; color: var(--mat-sys-outline); text-align: center; padding: 0.25rem 0; }
+
+ul {
+  margin: 0; padding-left: 1rem;
+  li { font-size: 0.78rem; line-height: 1.65; color: var(--mat-sys-on-surface); }
+}
+
+.agent-chips { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.agent-chip {
+  font-size: 0.68rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 999px;
+}
+.chip-a    { background: rgba(249,115,22,0.15); color: #f97316; }
+.chip-both { background: rgba(148,163,184,0.12); color: #94a3b8; }
+.chip-b    { background: rgba(96,165,250,0.15); color: #60a5fa; }
+
+mat-divider { margin: 0; }

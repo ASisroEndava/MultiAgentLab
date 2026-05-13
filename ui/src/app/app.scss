@@ -91,10 +91,12 @@
   }
 }
 
-.result-panel {
+.result-panel,
+.history-panel {
   height: 100%;
   overflow-y: auto;
   padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
   box-sizing: border-box;
 }
 

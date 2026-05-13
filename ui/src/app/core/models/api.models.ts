@@ -80,6 +80,8 @@ export interface ExecutionSummary {
   status: string;
   totalMs: number;
   eventCount: number;
+  provider?: string;
+  model?: string;
 }
 
 export interface AgentCard {
@@ -97,4 +99,60 @@ export type StreamStatus = 'idle' | 'polling' | 'complete' | 'error';
 export interface ProvidersStatus {
   ollama: boolean;
   bedrock: boolean;
+}
+
+export interface ExecutionSnapshot {
+  executionId: string;
+  timestamp: string;
+  storyId: string;
+  title: string;
+  provider: string;
+  model: string;
+  status: string;
+  invokedAgents: string[];
+}
+
+export interface SemanticPair {
+  a: string;
+  b: string;
+}
+
+export interface SemanticDiff {
+  similar: SemanticPair[];
+  onlyInA: string[];
+  onlyInB: string[];
+}
+
+export interface SemanticComparisonResult {
+  storyId: string;
+  title: string;
+  snapshotA: ExecutionSnapshot;
+  snapshotB: ExecutionSnapshot;
+  issues: SemanticDiff;
+  recommendations: SemanticDiff;
+  agentsOnlyInA: string[];
+  agentsOnlyInB: string[];
+  agentsInBoth: string[];
+}
+
+export interface SemanticCompareRequest {
+  a: string;
+  b: string;
+  provider: ProviderSelection;
+}
+
+export interface ComparisonResult {
+  storyId: string;
+  title: string;
+  snapshotA: ExecutionSnapshot;
+  snapshotB: ExecutionSnapshot;
+  issuesOnlyInA: string[];
+  issuesOnlyInB: string[];
+  issuesInBoth: string[];
+  recommendationsOnlyInA: string[];
+  recommendationsOnlyInB: string[];
+  recommendationsInBoth: string[];
+  agentsOnlyInA: string[];
+  agentsOnlyInB: string[];
+  agentsInBoth: string[];
 }

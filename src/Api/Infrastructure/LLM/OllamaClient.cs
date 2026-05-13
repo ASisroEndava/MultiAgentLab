@@ -34,7 +34,7 @@ public sealed class OllamaClient : IModelClient
             Options = new OllamaOptions
             {
                 Temperature = request.Provider.Temperature,
-                NumPredict = request.Provider.MaxTokens ?? 2048
+                NumPredict = request.Provider.MaxTokens ?? 8192
             }
         };
 

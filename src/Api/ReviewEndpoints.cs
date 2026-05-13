@@ -1,8 +1,10 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using MultiAgentLab.Api.Application.Supervisor;
 using MultiAgentLab.Api.Domain;
 using MultiAgentLab.Api.Infrastructure.Logging;
+using MultiAgentLab.Api.Infrastructure.LLM;
 using MultiAgentLab.Api.Infrastructure.Mocks;
 
 namespace MultiAgentLab.Api;
@@ -52,6 +54,22 @@ public static class ReviewEndpoints
            .WithName("GetOllamaModels")
            .WithOpenApi();
 
+        app.MapGet("/stories/{storyId}/executions", GetStoryExecutionsAsync)
+           .WithName("GetStoryExecutions")
+           .WithOpenApi();
+
+        app.MapGet("/executions/compare", CompareExecutionsAsync)
+           .WithName("CompareExecutions")
+           .WithOpenApi();
+
+        app.MapPost("/executions/compare/semantic", SemanticCompareAsync)
+           .WithName("SemanticCompare")
+           .WithOpenApi();
+
+        app.MapGet("/executions/{executionId}/result", GetExecutionResultAsync)
+           .WithName("GetExecutionResult")
+           .WithOpenApi();
+
         app.MapGet("/providers/status", GetProvidersStatusAsync)
            .WithName("GetProvidersStatus")
            .WithOpenApi();
@@ -59,6 +77,345 @@ public static class ReviewEndpoints
         app.MapGet("/dashboard", GetDashboard)
            .WithName("Dashboard")
            .ExcludeFromDescription();
+    }
+
+    private static async Task<IResult> GetStoryExecutionsAsync(
+        string storyId,
+        IExecutionLogger logger,
+        CancellationToken cancellationToken)
+    {
+        var ids = await logger.GetExecutionIdsByStoryIdAsync(storyId, cancellationToken);
+        var snapshots = new List<ExecutionSnapshot>();
+
+        foreach (var id in ids)
+        {
+            var logs = await logger.GetLogsAsync(id, cancellationToken);
+            var requestEvt = logs.FirstOrDefault(l => l.EventType == "request_received");
+            var finalEvt   = logs.LastOrDefault(l => l.EventType == "final_result_generated");
+            if (requestEvt is null || finalEvt is null) continue;
+
+            var reqData   = requestEvt.Data as JsonElement? ?? default;
+            var finalData = finalEvt.Data   as JsonElement? ?? default;
+
+            snapshots.Add(new ExecutionSnapshot
+            {
+                ExecutionId   = id,
+                Timestamp     = requestEvt.Timestamp.ToString("o"),
+                StoryId       = storyId,
+                Title         = GetJsonString(reqData, "title") ?? storyId,
+                Provider      = GetJsonString(finalData, "provider") ?? "",
+                Model         = GetJsonString(finalData, "model") ?? "",
+                Status        = GetJsonString(finalData, "status") ?? "unknown",
+                InvokedAgents = GetJsonStringList(finalData, "invokedAgents")
+            });
+        }
+
+        return Results.Ok(snapshots);
+    }
+
+    private static async Task<IResult> CompareExecutionsAsync(
+        string a,
+        string b,
+        IExecutionLogger logger,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(a) || string.IsNullOrWhiteSpace(b))
+            return Results.BadRequest(new { message = "Both 'a' and 'b' query parameters are required." });
+
+        var (resultA, logsA) = await GetResultWithLogsAsync(logger, a, cancellationToken);
+        var (resultB, logsB) = await GetResultWithLogsAsync(logger, b, cancellationToken);
+
+        if (resultA is null) return Results.NotFound(new { message = $"Execution '{a}' not found." });
+        if (resultB is null) return Results.NotFound(new { message = $"Execution '{b}' not found." });
+
+        var reqDataA = (logsA.FirstOrDefault(l => l.EventType == "request_received")?.Data as JsonElement?) ?? default;
+        var reqDataB = (logsB.FirstOrDefault(l => l.EventType == "request_received")?.Data as JsonElement?) ?? default;
+        var storyIdA = GetJsonString(reqDataA, "storyId") ?? "";
+        var storyIdB = GetJsonString(reqDataB, "storyId") ?? "";
+
+        if (!string.IsNullOrEmpty(storyIdA) && !string.IsNullOrEmpty(storyIdB) && storyIdA != storyIdB)
+            return Results.BadRequest(new { message = $"Executions belong to different stories ('{storyIdA}' vs '{storyIdB}')." });
+
+        var finalDataA = (logsA.LastOrDefault(l => l.EventType == "final_result_generated")?.Data as JsonElement?) ?? default;
+        var finalDataB = (logsB.LastOrDefault(l => l.EventType == "final_result_generated")?.Data as JsonElement?) ?? default;
+
+        var snapshotA = new ExecutionSnapshot
+        {
+            ExecutionId   = a,
+            Timestamp     = logsA.FirstOrDefault(l => l.EventType == "request_received")?.Timestamp.ToString("o") ?? "",
+            StoryId       = storyIdA,
+            Title         = GetJsonString(reqDataA, "title") ?? storyIdA,
+            Provider      = GetJsonString(finalDataA, "provider") ?? "",
+            Model         = GetJsonString(finalDataA, "model") ?? "",
+            Status        = GetJsonString(finalDataA, "status") ?? "unknown",
+            InvokedAgents = GetJsonStringList(finalDataA, "invokedAgents")
+        };
+        var snapshotB = new ExecutionSnapshot
+        {
+            ExecutionId   = b,
+            Timestamp     = logsB.FirstOrDefault(l => l.EventType == "request_received")?.Timestamp.ToString("o") ?? "",
+            StoryId       = storyIdB,
+            Title         = GetJsonString(reqDataB, "title") ?? storyIdB,
+            Provider      = GetJsonString(finalDataB, "provider") ?? "",
+            Model         = GetJsonString(finalDataB, "model") ?? "",
+            Status        = GetJsonString(finalDataB, "status") ?? "unknown",
+            InvokedAgents = GetJsonStringList(finalDataB, "invokedAgents")
+        };
+
+        var issuesA  = resultA.Issues.ToHashSet();
+        var issuesB  = resultB.Issues.ToHashSet();
+        var recsA    = resultA.Recommendations.ToHashSet();
+        var recsB    = resultB.Recommendations.ToHashSet();
+        var agentsA  = resultA.InvokedAgents.ToHashSet();
+        var agentsB  = resultB.InvokedAgents.ToHashSet();
+
+        return Results.Ok(new ComparisonResult
+        {
+            StoryId                = storyIdA,
+            Title                  = snapshotA.Title,
+            SnapshotA              = snapshotA,
+            SnapshotB              = snapshotB,
+            IssuesOnlyInA          = issuesA.Except(issuesB).ToList(),
+            IssuesOnlyInB          = issuesB.Except(issuesA).ToList(),
+            IssuesInBoth           = issuesA.Intersect(issuesB).ToList(),
+            RecommendationsOnlyInA = recsA.Except(recsB).ToList(),
+            RecommendationsOnlyInB = recsB.Except(recsA).ToList(),
+            RecommendationsInBoth  = recsA.Intersect(recsB).ToList(),
+            AgentsOnlyInA          = agentsA.Except(agentsB).ToList(),
+            AgentsOnlyInB          = agentsB.Except(agentsA).ToList(),
+            AgentsInBoth           = agentsA.Intersect(agentsB).ToList()
+        });
+    }
+
+    private static async Task<IResult> GetExecutionResultAsync(
+        string executionId,
+        IExecutionLogger logger,
+        CancellationToken cancellationToken)
+    {
+        var result = await logger.GetFinalResultAsync(executionId, cancellationToken);
+        return result is null
+            ? Results.NotFound(new { message = $"Execution '{executionId}' has no final result yet." })
+            : Results.Ok(result);
+    }
+
+    private static async Task<IResult> SemanticCompareAsync(
+        [FromBody] SemanticCompareRequest request,
+        IExecutionLogger logger,
+        IModelRouter modelRouter,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.A) || string.IsNullOrWhiteSpace(request.B))
+            return Results.BadRequest(new { message = "Both 'a' and 'b' execution IDs are required." });
+
+        var (resultA, logsA) = await GetResultWithLogsAsync(logger, request.A, cancellationToken);
+        var (resultB, logsB) = await GetResultWithLogsAsync(logger, request.B, cancellationToken);
+
+        if (resultA is null) return Results.NotFound(new { message = $"Execution '{request.A}' not found." });
+        if (resultB is null) return Results.NotFound(new { message = $"Execution '{request.B}' not found." });
+
+        var reqDataA   = (logsA.FirstOrDefault(l => l.EventType == "request_received")?.Data as JsonElement?) ?? default;
+        var reqDataB   = (logsB.FirstOrDefault(l => l.EventType == "request_received")?.Data as JsonElement?) ?? default;
+        var finalDataA = (logsA.LastOrDefault(l => l.EventType == "final_result_generated")?.Data as JsonElement?) ?? default;
+        var finalDataB = (logsB.LastOrDefault(l => l.EventType == "final_result_generated")?.Data as JsonElement?) ?? default;
+
+        var snapshotA = new ExecutionSnapshot
+        {
+            ExecutionId   = request.A,
+            Timestamp     = logsA.FirstOrDefault(l => l.EventType == "request_received")?.Timestamp.ToString("o") ?? "",
+            StoryId       = GetJsonString(reqDataA, "storyId") ?? "",
+            Title         = GetJsonString(reqDataA, "title") ?? request.A,
+            Provider      = GetJsonString(finalDataA, "provider") ?? "",
+            Model         = GetJsonString(finalDataA, "model") ?? "",
+            Status        = GetJsonString(finalDataA, "status") ?? "unknown",
+            InvokedAgents = GetJsonStringList(finalDataA, "invokedAgents")
+        };
+        var snapshotB = new ExecutionSnapshot
+        {
+            ExecutionId   = request.B,
+            Timestamp     = logsB.FirstOrDefault(l => l.EventType == "request_received")?.Timestamp.ToString("o") ?? "",
+            StoryId       = GetJsonString(reqDataB, "storyId") ?? "",
+            Title         = GetJsonString(reqDataB, "title") ?? request.B,
+            Provider      = GetJsonString(finalDataB, "provider") ?? "",
+            Model         = GetJsonString(finalDataB, "model") ?? "",
+            Status        = GetJsonString(finalDataB, "status") ?? "unknown",
+            InvokedAgents = GetJsonStringList(finalDataB, "invokedAgents")
+        };
+
+        var agentsA = resultA.InvokedAgents.ToHashSet();
+        var agentsB = resultB.InvokedAgents.ToHashSet();
+
+        SemanticDiff issuesDiff, recsDiff;
+        try
+        {
+            (issuesDiff, recsDiff) = await CallSemanticLlmAsync(
+                resultA.Issues, resultB.Issues,
+                resultA.Recommendations, resultB.Recommendations,
+                request.Provider, modelRouter, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return Results.Problem(title: "Comparison cancelled", detail: "The request was cancelled.", statusCode: 499);
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(
+                title: "LLM call failed",
+                detail: ex.Message,
+                statusCode: 500);
+        }
+
+        return Results.Ok(new SemanticComparisonResult
+        {
+            StoryId         = snapshotA.StoryId,
+            Title           = snapshotA.Title,
+            SnapshotA       = snapshotA,
+            SnapshotB       = snapshotB,
+            Issues          = issuesDiff,
+            Recommendations = recsDiff,
+            AgentsOnlyInA   = agentsA.Except(agentsB).ToList(),
+            AgentsOnlyInB   = agentsB.Except(agentsA).ToList(),
+            AgentsInBoth    = agentsA.Intersect(agentsB).ToList()
+        });
+    }
+
+    private static async Task<(SemanticDiff issues, SemanticDiff recommendations)> CallSemanticLlmAsync(
+        List<string> issuesA, List<string> issuesB,
+        List<string> recsA,   List<string> recsB,
+        ProviderSelection provider, IModelRouter modelRouter,
+        CancellationToken ct)
+    {
+        static string ListItems(List<string> items) =>
+            items.Count == 0 ? "(none)" : string.Join("\n", items.Select((x, i) => $"{i + 1}. {x}"));
+
+        var prompt = $$"""
+            You are a semantic similarity analyzer for user story reviews.
+            Two reviews were performed independently on the same user story.
+            Identify which items express the same quality concern (even in different words),
+            and which are unique to each review.
+
+            ISSUES from Review A:
+            {{ListItems(issuesA)}}
+
+            ISSUES from Review B:
+            {{ListItems(issuesB)}}
+
+            RECOMMENDATIONS from Review A:
+            {{ListItems(recsA)}}
+
+            RECOMMENDATIONS from Review B:
+            {{ListItems(recsB)}}
+
+            IMPORTANT: Output ONLY a valid JSON object — no markdown fences, no comments.
+            Use the exact original text for each item. Each item must appear in exactly one group.
+            {
+              "issues": {
+                "similar": [{"a": "<text from A>", "b": "<text from B>"}, ...],
+                "onlyInA": ["<text>", ...],
+                "onlyInB": ["<text>", ...]
+              },
+              "recommendations": {
+                "similar": [{"a": "<text from A>", "b": "<text from B>"}, ...],
+                "onlyInA": ["<text>", ...],
+                "onlyInB": ["<text>", ...]
+              }
+            }
+            """;
+
+        var providerWithTokens = new ProviderSelection
+        {
+            Type        = provider.Type,
+            Model       = provider.Model,
+            Region      = provider.Region,
+            Endpoint    = provider.Endpoint,
+            Temperature = provider.Temperature,
+            MaxTokens   = provider.MaxTokens ?? 4096,
+        };
+        var client   = modelRouter.Resolve(providerWithTokens);
+        var response = await client.GenerateAsync(new ModelRequest { Prompt = prompt, Provider = providerWithTokens }, ct);
+        return ParseSemanticResponse(response.Text, issuesA, issuesB, recsA, recsB);
+    }
+
+    private static readonly System.Text.Json.JsonDocumentOptions _lenientOpts = new()
+    {
+        AllowTrailingCommas = true,
+        CommentHandling = System.Text.Json.JsonCommentHandling.Skip
+    };
+
+    private static (SemanticDiff issues, SemanticDiff recommendations) ParseSemanticResponse(
+        string responseText,
+        List<string> issuesA, List<string> issuesB,
+        List<string> recsA,   List<string> recsB)
+    {
+        try
+        {
+            var s = responseText.IndexOf('{');
+            var e = responseText.LastIndexOf('}');
+            if (s >= 0)
+            {
+                var json = e > s ? responseText[s..(e + 1)] : responseText[s..];
+                using var doc = System.Text.Json.JsonDocument.Parse(json, _lenientOpts);
+                var root = doc.RootElement;
+                return (
+                    ParseSemanticDiff(root, "issues"),
+                    ParseSemanticDiff(root, "recommendations")
+                );
+            }
+        }
+        catch { }
+
+        return (
+            new SemanticDiff { OnlyInA = issuesA, OnlyInB = issuesB },
+            new SemanticDiff { OnlyInA = recsA,   OnlyInB = recsB }
+        );
+    }
+
+    private static SemanticDiff ParseSemanticDiff(System.Text.Json.JsonElement root, string key)
+    {
+        if (!root.TryGetProperty(key, out var section)) return new SemanticDiff();
+
+        var similar = new List<SemanticPair>();
+        if (section.TryGetProperty("similar", out var sim) && sim.ValueKind == System.Text.Json.JsonValueKind.Array)
+            foreach (var item in sim.EnumerateArray())
+                if (item.TryGetProperty("a", out var a) && item.TryGetProperty("b", out var b))
+                    similar.Add(new SemanticPair { A = a.GetString() ?? "", B = b.GetString() ?? "" });
+
+        return new SemanticDiff
+        {
+            Similar  = similar,
+            OnlyInA  = ExtractStringArray(section, "onlyInA"),
+            OnlyInB  = ExtractStringArray(section, "onlyInB")
+        };
+    }
+
+    private static List<string> ExtractStringArray(System.Text.Json.JsonElement el, string key)
+    {
+        if (!el.TryGetProperty(key, out var arr) || arr.ValueKind != System.Text.Json.JsonValueKind.Array)
+            return [];
+        return arr.EnumerateArray().Select(x => x.GetString() ?? "").Where(x => x.Length > 0).ToList();
+    }
+
+    private static async Task<(ReviewResult? result, List<ExecutionLogEvent> logs)> GetResultWithLogsAsync(
+        IExecutionLogger logger, string executionId, CancellationToken ct)
+    {
+        var logs   = await logger.GetLogsAsync(executionId, ct);
+        var result = await logger.GetFinalResultAsync(executionId, ct);
+        return (result, logs);
+    }
+
+    private static string? GetJsonString(JsonElement data, string prop)
+        => data.ValueKind == JsonValueKind.Object && data.TryGetProperty(prop, out var v)
+            ? v.GetString()
+            : null;
+
+    private static List<string> GetJsonStringList(JsonElement data, string prop)
+    {
+        if (data.ValueKind != JsonValueKind.Object || !data.TryGetProperty(prop, out var arr)
+            || arr.ValueKind != JsonValueKind.Array)
+            return [];
+        return arr.EnumerateArray()
+                  .Select(e => e.GetString() ?? "")
+                  .Where(s => s.Length > 0)
+                  .ToList();
     }
 
     private static Task<IResult> GetProvidersStatusAsync()
@@ -162,6 +519,13 @@ public static class ReviewEndpoints
             var finalData = final_?.Data as JsonElement? ?? default;
             var completedData = completed?.Data as JsonElement? ?? default;
 
+            var providerFromFinal = finalData.ValueKind == JsonValueKind.Object && finalData.TryGetProperty("provider", out var prov) ? prov.GetString() : null;
+            var modelFromFinal    = finalData.ValueKind == JsonValueKind.Object && finalData.TryGetProperty("model", out var mod) ? mod.GetString() : null;
+
+            var providerObj = data.ValueKind == JsonValueKind.Object && data.TryGetProperty("provider", out var po) && po.ValueKind == JsonValueKind.Object ? po : default;
+            var providerFallback = providerObj.ValueKind == JsonValueKind.Object && providerObj.TryGetProperty("type", out var pt) ? pt.GetString() : null;
+            var modelFallback    = providerObj.ValueKind == JsonValueKind.Object && providerObj.TryGetProperty("model", out var pm) ? pm.GetString() : null;
+
             summaries.Add(new
             {
                 executionId = id,
@@ -170,7 +534,9 @@ public static class ReviewEndpoints
                 storyId = data.ValueKind == JsonValueKind.Object && data.TryGetProperty("storyId", out var s) ? s.GetString() : null,
                 status = finalData.ValueKind == JsonValueKind.Object && finalData.TryGetProperty("status", out var st) ? st.GetString() : "unknown",
                 totalMs = completedData.ValueKind == JsonValueKind.Object && completedData.TryGetProperty("totalMs", out var ms) ? ms.GetDouble() : 0,
-                eventCount = logs.Count
+                eventCount = logs.Count,
+                provider = providerFromFinal ?? providerFallback,
+                model = modelFromFinal ?? modelFallback,
             });
         }
 

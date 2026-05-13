@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Amazon;
 using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
@@ -25,22 +26,12 @@ public sealed class BedrockClient : IModelClient
             ? new AmazonBedrockRuntimeClient(credentials, region)
             : new AmazonBedrockRuntimeClient(region);
 
-        var payload = new
-        {
-            anthropic_version = "bedrock-2023-05-31",
-            max_tokens = request.Provider.MaxTokens ?? 2048,
-            temperature = request.Provider.Temperature,
-            messages = new[]
-            {
-                new { role = "user", content = request.Prompt }
-            }
-        };
-
-        var payloadJson = JsonSerializer.Serialize(payload);
+        var modelId = request.Provider.Model;
+        var payloadJson = BuildPayload(StripRegionPrefix(modelId), request);
 
         var invokeRequest = new InvokeModelRequest
         {
-            ModelId = request.Provider.Model,
+            ModelId = modelId,
             ContentType = "application/json",
             Accept = "application/json",
             Body = new MemoryStream(Encoding.UTF8.GetBytes(payloadJson))
@@ -50,13 +41,10 @@ public sealed class BedrockClient : IModelClient
 
         using var reader = new StreamReader(response.Body);
         var responseJson = await reader.ReadToEndAsync(cancellationToken);
-        var bedrockResponse = JsonSerializer.Deserialize<BedrockResponse>(responseJson);
 
         sw.Stop();
 
-        var text = bedrockResponse?.Content?.FirstOrDefault()?.Text ?? string.Empty;
-        var tokensUsed = (bedrockResponse?.Usage?.OutputTokens ?? 0) +
-                         (bedrockResponse?.Usage?.InputTokens ?? 0);
+        var (text, tokensUsed) = ExtractResponse(StripRegionPrefix(modelId), responseJson);
 
         return new ModelResponse
         {
@@ -66,27 +54,127 @@ public sealed class BedrockClient : IModelClient
         };
     }
 
-    private sealed class BedrockResponse
+    private static string StripRegionPrefix(string modelId) =>
+        Regex.Replace(modelId, @"^(us|eu|ap)\.", string.Empty);
+
+    private static string BuildPayload(string modelId, ModelRequest request) => modelId switch
     {
-        [JsonPropertyName("content")]
-        public List<BedrockContent>? Content { get; set; }
+        var m when m.StartsWith("anthropic.") => JsonSerializer.Serialize(new
+        {
+            anthropic_version = "bedrock-2023-05-31",
+            max_tokens = request.Provider.MaxTokens ?? 8192,
+            temperature = request.Provider.Temperature,
+            messages = new[] { new { role = "user", content = request.Prompt } }
+        }),
+        var m when m.StartsWith("amazon.nova") => JsonSerializer.Serialize(new
+        {
+            messages = new[] { new { role = "user", content = new[] { new { text = request.Prompt } } } },
+            inferenceConfig = new
+            {
+                maxTokens = request.Provider.MaxTokens ?? 8192,
+                temperature = request.Provider.Temperature,
+            }
+        }),
+        var m when m.StartsWith("amazon.titan-text") => JsonSerializer.Serialize(new
+        {
+            inputText = request.Prompt,
+            textGenerationConfig = new
+            {
+                maxTokenCount = request.Provider.MaxTokens ?? 8192,
+                temperature = request.Provider.Temperature,
+                topP = 0.9
+            }
+        }),
+        var m when m.StartsWith("meta.llama") => JsonSerializer.Serialize(new
+        {
+            prompt = request.Prompt,
+            max_gen_len = request.Provider.MaxTokens ?? 8192,
+            temperature = request.Provider.Temperature,
+            top_p = 0.9
+        }),
+        var m when m.StartsWith("mistral.") => JsonSerializer.Serialize(new
+        {
+            prompt = $"<s>[INST] {request.Prompt} [/INST]",
+            max_tokens = request.Provider.MaxTokens ?? 8192,
+            temperature = request.Provider.Temperature,
+            top_p = 0.9
+        }),
+        _ => JsonSerializer.Serialize(new
+        {
+            anthropic_version = "bedrock-2023-05-31",
+            max_tokens = request.Provider.MaxTokens ?? 8192,
+            temperature = request.Provider.Temperature,
+            messages = new[] { new { role = "user", content = request.Prompt } }
+        })
+    };
 
-        [JsonPropertyName("usage")]
-        public BedrockUsage? Usage { get; set; }
-    }
-
-    private sealed class BedrockContent
+    private static (string text, int tokens) ExtractResponse(string modelId, string responseJson)
     {
-        [JsonPropertyName("text")]
-        public string? Text { get; set; }
-    }
+        using var doc = JsonDocument.Parse(responseJson);
+        var root = doc.RootElement;
 
-    private sealed class BedrockUsage
-    {
-        [JsonPropertyName("input_tokens")]
-        public int InputTokens { get; set; }
+        if (modelId.StartsWith("anthropic."))
+        {
+            var text = root.TryGetProperty("content", out var content)
+                ? content.EnumerateArray().FirstOrDefault().TryGetProperty("text", out var t) ? t.GetString() ?? "" : ""
+                : "";
+            var tokens = 0;
+            if (root.TryGetProperty("usage", out var usage))
+            {
+                tokens += usage.TryGetProperty("input_tokens", out var i) ? i.GetInt32() : 0;
+                tokens += usage.TryGetProperty("output_tokens", out var o) ? o.GetInt32() : 0;
+            }
+            return (text, tokens);
+        }
 
-        [JsonPropertyName("output_tokens")]
-        public int OutputTokens { get; set; }
+        if (modelId.StartsWith("amazon.nova"))
+        {
+            var text = "";
+            if (root.TryGetProperty("output", out var output)
+                && output.TryGetProperty("message", out var message)
+                && message.TryGetProperty("content", out var content))
+            {
+                text = content.EnumerateArray().FirstOrDefault()
+                    .TryGetProperty("text", out var t) ? t.GetString() ?? "" : "";
+            }
+            var tokens = 0;
+            if (root.TryGetProperty("usage", out var usage))
+            {
+                tokens += usage.TryGetProperty("inputTokens", out var i) ? i.GetInt32() : 0;
+                tokens += usage.TryGetProperty("outputTokens", out var o) ? o.GetInt32() : 0;
+            }
+            return (text, tokens);
+        }
+
+        if (modelId.StartsWith("amazon.titan-text"))
+        {
+            var text = root.TryGetProperty("results", out var results)
+                ? results.EnumerateArray().FirstOrDefault().TryGetProperty("outputText", out var t) ? t.GetString() ?? "" : ""
+                : "";
+            var inputTokens = root.TryGetProperty("inputTextTokenCount", out var it) ? it.GetInt32() : 0;
+            var outputTokens = root.TryGetProperty("results", out var r2)
+                ? r2.EnumerateArray().FirstOrDefault().TryGetProperty("tokenCount", out var tc) ? tc.GetInt32() : 0
+                : 0;
+            return (text, inputTokens + outputTokens);
+        }
+
+        if (modelId.StartsWith("meta.llama"))
+        {
+            var text = root.TryGetProperty("generation", out var gen) ? gen.GetString() ?? "" : "";
+            var tokens = 0;
+            tokens += root.TryGetProperty("prompt_token_count", out var pt) ? pt.GetInt32() : 0;
+            tokens += root.TryGetProperty("generation_token_count", out var gt) ? gt.GetInt32() : 0;
+            return (text, tokens);
+        }
+
+        if (modelId.StartsWith("mistral."))
+        {
+            var text = root.TryGetProperty("outputs", out var outputs)
+                ? outputs.EnumerateArray().FirstOrDefault().TryGetProperty("text", out var t) ? t.GetString() ?? "" : ""
+                : "";
+            return (text, 0);
+        }
+
+        return ("", 0);
     }
 }
