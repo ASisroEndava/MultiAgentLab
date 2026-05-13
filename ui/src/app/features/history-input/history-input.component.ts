@@ -122,7 +122,19 @@ export class HistoryInputComponent implements OnInit {
     const mc = this.selectedMockCase();
 
     if (mc) {
-      this.api.startMockCase(mc.caseId).subscribe({
+      this.api.startMockCase(mc.caseId, {
+        provider: {
+          type: this.providerType(),
+          model: this.model(),
+          endpoint: this.providerType() === 'ollama' ? this.endpoint() : undefined,
+          temperature: 0.2,
+        },
+        logging: {
+          level: this.loggingLevel(),
+          includePrompts: this.includePrompts(),
+          includeResponses: this.includeResponses(),
+        },
+      }).subscribe({
         next: (res) => {
           this.submitting.set(false);
           this.executionStarted.emit({ type: 'async', executionId: res.executionId });

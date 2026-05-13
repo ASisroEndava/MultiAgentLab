@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { DatePipe, DecimalPipe, SlicePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -37,6 +37,7 @@ export interface StoryGroup {
 })
 export class StoryHistoryComponent implements OnInit {
   private readonly api = inject(ReviewApiService);
+  private readonly comparisonResultAnchor = viewChild<ElementRef<HTMLElement>>('comparisonResultAnchor');
 
   protected loading   = signal(true);
   protected error     = signal<string | null>(null);
@@ -79,6 +80,10 @@ export class StoryHistoryComponent implements OnInit {
       next: (status) => this.providersStatus.set(status),
     });
     this.fetchOllamaModels();
+  }
+
+  refresh(): void {
+    this.load();
   }
 
   protected onProviderChange(): void {
@@ -160,6 +165,9 @@ export class StoryHistoryComponent implements OnInit {
       next: (result) => {
         this.comparisonResult.set(result);
         this.comparing.set(false);
+        setTimeout(() => {
+          this.comparisonResultAnchor()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 0);
       },
       error: (err) => {
         const e = err?.error;

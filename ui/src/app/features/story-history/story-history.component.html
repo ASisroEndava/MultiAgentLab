@@ -139,7 +139,9 @@
 
   <!-- Comparison result -->
   @if (comparisonResult()) {
-    <app-comparison-panel [result]="comparisonResult()!" />
+    <div #comparisonResultAnchor>
+      <app-comparison-panel [result]="comparisonResult()!" />
+    </div>
   }
 
 </div>

@@ -584,6 +584,7 @@ public static class ReviewEndpoints
 
     private static async Task<IResult> RunMockCaseAsync(
         string caseId,
+        MockCaseExecutionRequest? request,
         MockCaseLoader mockLoader,
         ReviewSupervisor supervisor,
         CancellationToken cancellationToken)
@@ -595,7 +596,8 @@ public static class ReviewEndpoints
 
         try
         {
-            var result = await supervisor.ReviewAsync(mockCase.Request, cancellationToken);
+            var reviewRequest = BuildMockReviewRequest(mockCase.Request, request?.Provider, request?.Logging);
+            var result = await supervisor.ReviewAsync(reviewRequest, cancellationToken);
             return Results.Ok(new
             {
                 mockCase = new
@@ -620,6 +622,7 @@ public static class ReviewEndpoints
 
     private static async Task<IResult> StartMockCaseAsync(
         string caseId,
+        MockCaseExecutionRequest? request,
         MockCaseLoader mockLoader,
         ReviewSupervisor supervisor,
         IExecutionLogger executionLogger,
@@ -636,7 +639,8 @@ public static class ReviewEndpoints
         {
             try
             {
-                await supervisor.ReviewAsync(mockCase.Request, CancellationToken.None, executionId);
+                var reviewRequest = BuildMockReviewRequest(mockCase.Request, request?.Provider, request?.Logging);
+                await supervisor.ReviewAsync(reviewRequest, CancellationToken.None, executionId);
             }
             catch (Exception ex)
             {
@@ -645,6 +649,24 @@ public static class ReviewEndpoints
         });
 
         return Results.Ok(new { executionId, caseId, status = "started" });
+    }
+
+    private static ReviewRequest BuildMockReviewRequest(
+        ReviewRequest baseRequest,
+        ProviderSelection? providerOverride,
+        LoggingOptions? loggingOverride)
+    {
+        if (providerOverride is null && loggingOverride is null)
+            return baseRequest;
+
+        return new ReviewRequest
+        {
+            StoryId = baseRequest.StoryId,
+            Title = baseRequest.Title,
+            StoryText = baseRequest.StoryText,
+            Provider = providerOverride ?? baseRequest.Provider,
+            Logging = loggingOverride ?? baseRequest.Logging
+        };
     }
 
     private static async Task<IResult> GetExecutionLogTextAsync(
@@ -810,6 +832,12 @@ public static class ReviewEndpoints
     {
         if (data.TryGetProperty(prop, out var val))
             sb.AppendLine($"{label,-20} {val}");
+    }
+
+    private sealed class MockCaseExecutionRequest
+    {
+        public ProviderSelection? Provider { get; init; }
+        public LoggingOptions? Logging { get; init; }
     }
 
     private static IResult GetDashboard()

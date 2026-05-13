@@ -53,56 +53,56 @@
         <textarea matInput [ngModel]="storyText()" (ngModelChange)="storyText.set($event)" rows="5"
           placeholder="As a user, I want to..."></textarea>
       </mat-form-field>
-
-      <div class="row-fields">
-        <mat-form-field appearance="outline" class="half-width">
-          <mat-label>Provider</mat-label>
-          <mat-select [ngModel]="providerType()" (ngModelChange)="providerType.set($event); onProviderChange()">
-            <mat-option value="ollama">Ollama</mat-option>
-            <mat-option value="bedrock" [disabled]="!providersStatus().bedrock"
-              [matTooltip]="!providersStatus().bedrock ? 'AWS credentials not found on the server' : ''">
-              Bedrock{{ !providersStatus().bedrock ? ' (not configured)' : '' }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="half-width">
-          <mat-label>Model</mat-label>
-          <mat-select [ngModel]="model()" (ngModelChange)="model.set($event)"
-            [disabled]="ollamaModelsLoading() && providerType() === 'ollama'">
-            @for (m of availableModels; track m) {
-              <mat-option [value]="m">{{ m }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      @if (providerType() === 'ollama') {
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Ollama endpoint</mat-label>
-          <input matInput [ngModel]="endpoint()" (ngModelChange)="endpoint.set($event)" (blur)="onEndpointBlur()" />
-        </mat-form-field>
-      }
-
-      <div class="row-fields">
-        <mat-form-field appearance="outline" class="half-width">
-          <mat-label>Logging</mat-label>
-          <mat-select [ngModel]="loggingLevel()" (ngModelChange)="loggingLevel.set($event)">
-            <mat-option value="basic">Basic</mat-option>
-            <mat-option value="standard">Standard</mat-option>
-            <mat-option value="full">Full</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <div class="logging-checkboxes">
-          <mat-checkbox [ngModel]="includePrompts()" (ngModelChange)="includePrompts.set($event)">
-            Include Prompts
-          </mat-checkbox>
-          <mat-checkbox [ngModel]="includeResponses()" (ngModelChange)="includeResponses.set($event)">
-            Include Responses
-          </mat-checkbox>
-        </div>
-      </div>
     }
+
+    <div class="row-fields">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Provider</mat-label>
+        <mat-select [ngModel]="providerType()" (ngModelChange)="providerType.set($event); onProviderChange()">
+          <mat-option value="ollama">Ollama</mat-option>
+          <mat-option value="bedrock" [disabled]="!providersStatus().bedrock"
+            [matTooltip]="!providersStatus().bedrock ? 'AWS credentials not found on the server' : ''">
+            Bedrock{{ !providersStatus().bedrock ? ' (not configured)' : '' }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Model</mat-label>
+        <mat-select [ngModel]="model()" (ngModelChange)="model.set($event)"
+          [disabled]="ollamaModelsLoading() && providerType() === 'ollama'">
+          @for (m of availableModels; track m) {
+            <mat-option [value]="m">{{ m }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    @if (providerType() === 'ollama') {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Ollama endpoint</mat-label>
+        <input matInput [ngModel]="endpoint()" (ngModelChange)="endpoint.set($event)" (blur)="onEndpointBlur()" />
+      </mat-form-field>
+    }
+
+    <div class="row-fields">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Logging</mat-label>
+        <mat-select [ngModel]="loggingLevel()" (ngModelChange)="loggingLevel.set($event)">
+          <mat-option value="basic">Basic</mat-option>
+          <mat-option value="standard">Standard</mat-option>
+          <mat-option value="full">Full</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div class="logging-checkboxes">
+        <mat-checkbox [ngModel]="includePrompts()" (ngModelChange)="includePrompts.set($event)">
+          Include Prompts
+        </mat-checkbox>
+        <mat-checkbox [ngModel]="includeResponses()" (ngModelChange)="includeResponses.set($event)">
+          Include Responses
+        </mat-checkbox>
+      </div>
+    </div>
   </mat-card-content>
 
   <mat-card-actions>
