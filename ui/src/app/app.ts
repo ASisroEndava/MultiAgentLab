@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal, viewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -26,6 +26,8 @@ import { ExecutionHistoryComponent } from './features/execution-history/executio
 export class App {
   protected readonly state = inject(ExecutionStateService);
   protected readonly activeTab = signal(0);
+  private readonly executionHistory = viewChild(ExecutionHistoryComponent);
+  private readonly storyHistory = viewChild(StoryHistoryComponent);
 
   constructor() {
     effect(() => {
@@ -42,6 +44,16 @@ export class App {
       this.state.begin(event.executionId);
     } else {
       this.state.setDirectResult(event.result);
+    }
+  }
+
+  protected onTabChanged(index: number): void {
+    this.activeTab.set(index);
+    if (index === 2) {
+      this.executionHistory()?.refresh();
+    }
+    if (index === 3) {
+      this.storyHistory()?.refresh();
     }
   }
 }

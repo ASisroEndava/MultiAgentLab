@@ -7,6 +7,7 @@ import {
   ExecutionLogEvent,
   ExecutionSummary,
   MockCaseSummary,
+  MockCaseExecutionRequest,
   ProvidersStatus,
   ReviewRequest,
   ReviewResult,
@@ -24,10 +25,10 @@ export class ReviewApiService {
     return this.http.get<MockCaseSummary[]>(`${this.base}/mock-cases`);
   }
 
-  startMockCase(caseId: string): Observable<StartCaseResponse> {
+  startMockCase(caseId: string, request?: MockCaseExecutionRequest): Observable<StartCaseResponse> {
     return this.http.post<StartCaseResponse>(
       `${this.base}/mock-cases/${caseId}/start`,
-      {}
+      request ?? {}
     );
   }
 

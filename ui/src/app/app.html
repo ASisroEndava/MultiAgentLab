@@ -16,7 +16,7 @@
 
   <mat-tab-group class="main-tabs"
     [selectedIndex]="activeTab()"
-    (selectedIndexChange)="activeTab.set($event)"
+    (selectedIndexChange)="onTabChanged($event)"
     animationDuration="150ms">
 
     <mat-tab>

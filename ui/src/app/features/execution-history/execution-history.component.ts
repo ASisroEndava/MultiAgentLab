@@ -46,6 +46,10 @@ export class ExecutionHistoryComponent implements OnInit {
     this.load();
   }
 
+  refresh(): void {
+    this.load();
+  }
+
   protected load(): void {
     this.loading.set(true);
     this.error.set(null);

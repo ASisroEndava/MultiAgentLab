@@ -72,6 +72,11 @@ export interface StartCaseResponse {
   status: string;
 }
 
+export interface MockCaseExecutionRequest {
+  provider?: ProviderSelection;
+  logging?: LoggingOptions;
+}
+
 export interface ExecutionSummary {
   executionId: string;
   timestamp: string;
