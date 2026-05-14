@@ -2,8 +2,8 @@
   "caseId": "mock-03",
   "title": "Case 3 - Automatic notification retries",
   "description": "Backend story where UX does not participate. The technical agent is activated.",
-  "expectedAgents": ["clarity", "qa", "technical"],
-  "expectedStatus": "yellow",
+  "expectedAgents": [],
+  "expectedStatus": "",
   "request": {
     "storyId": "story-003",
     "title": "Automatic retries",

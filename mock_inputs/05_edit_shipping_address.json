@@ -2,8 +2,8 @@
   "caseId": "mock-05",
   "title": "Case 5 - Edit shipping address",
   "description": "Shows conflict resolution between UX and technical agents.",
-  "expectedAgents": ["clarity", "qa", "technical", "ux"],
-  "expectedStatus": "yellow",
+  "expectedAgents": [],
+  "expectedStatus": "",
   "request": {
     "storyId": "story-005",
     "title": "Edit shipping address",

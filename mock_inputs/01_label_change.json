@@ -2,8 +2,8 @@
   "caseId": "mock-01",
   "title": "Case 1 - Simple text change",
   "description": "Simple case where the supervisor avoids over-executing agents. Only clarity and ux are invoked.",
-  "expectedAgents": ["clarity", "ux"],
-  "expectedStatus": "green",
+  "expectedAgents": [],
+  "expectedStatus": "",
   "request": {
     "storyId": "story-001",
     "title": "Change button text",

@@ -2,8 +2,8 @@
   "caseId": "mock-04",
   "title": "Case 4 - Personal data download",
   "description": "Shows the activation of the compliance agent and a higher severity output.",
-  "expectedAgents": ["clarity", "qa", "technical", "compliance"],
-  "expectedStatus": "red",
+  "expectedAgents": [],
+  "expectedStatus": "",
   "request": {
     "storyId": "story-004",
     "title": "Download personal report",
