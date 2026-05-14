@@ -55,15 +55,11 @@ export class StoryHistoryComponent implements OnInit {
   protected ollamaModelsLoading = signal(false);
   protected readonly bedrockModels = [
     'us.anthropic.claude-3-5-haiku-20241022-v1:0',
-    'us.anthropic.claude-3-5-sonnet-20241022-v2:0',
-    'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
     'us.amazon.nova-micro-v1:0',
     'us.amazon.nova-lite-v1:0',
     'us.amazon.nova-pro-v1:0',
     'us.meta.llama3-1-8b-instruct-v1:0',
-    'us.meta.llama3-1-70b-instruct-v1:0',
-    'us.meta.llama3-3-70b-instruct-v1:0',
-    'us.mistral.mistral-large-2402-v1:0',
+    'us.meta.llama3-3-70b-instruct-v1:0'
   ];
   protected readonly providersStatus = signal<ProvidersStatus>({ ollama: true, bedrock: false });
 
