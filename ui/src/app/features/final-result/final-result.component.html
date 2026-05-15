@@ -86,8 +86,17 @@
                     </mat-panel-title>
                   </mat-expansion-panel-header>
                   <ul class="detail-list">
-                    @for (item of (result.issues ?? []); track $index) {
-                      <li>{{ item }}</li>
+                    @for (group of issuesByAgent(result); track group.agent) {
+                      <li>
+                        <div class="detail-group-agent">
+                          {{ group.agent === 'unattributed' ? 'Unattributed' : group.agent }}
+                        </div>
+                        <ul class="detail-sublist">
+                          @for (item of group.items; track $index) {
+                            <li>{{ item }}</li>
+                          }
+                        </ul>
+                      </li>
                     }
                   </ul>
                 </mat-expansion-panel>
@@ -102,8 +111,17 @@
                     </mat-panel-title>
                   </mat-expansion-panel-header>
                   <ul class="detail-list">
-                    @for (item of (result.recommendations ?? []); track $index) {
-                      <li>{{ item }}</li>
+                    @for (group of recommendationsByAgent(result); track group.agent) {
+                      <li>
+                        <div class="detail-group-agent">
+                          {{ group.agent === 'unattributed' ? 'Unattributed' : group.agent }}
+                        </div>
+                        <ul class="detail-sublist">
+                          @for (item of group.items; track $index) {
+                            <li>{{ item }}</li>
+                          }
+                        </ul>
+                      </li>
                     }
                   </ul>
                 </mat-expansion-panel>
