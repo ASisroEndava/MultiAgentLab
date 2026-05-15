@@ -30,6 +30,20 @@
         <mat-icon>info</mat-icon>
         <span>{{ selectedMockCase()!.description }}</span>
       </div>
+      <div class="mock-request">
+        <div class="mock-request-row">
+          <span class="label">Story ID</span>
+          <span class="value mono">{{ selectedMockCase()!.storyId }}</span>
+        </div>
+        <div class="mock-request-row">
+          <span class="label">Title</span>
+          <span class="value">{{ selectedMockCase()!.requestTitle }}</span>
+        </div>
+        <div class="mock-request-row">
+          <span class="label">User Story</span>
+          <p class="value story-text">{{ selectedMockCase()!.storyText }}</p>
+        </div>
+      </div>
       <div class="mock-agents">
         @for (a of selectedMockCase()!.expectedAgents; track a) {
           <span class="agent-chip">{{ a }}</span>
