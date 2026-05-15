@@ -1,7 +1,7 @@
 {
   "caseId": "mock-01",
   "title": "Case 1 - Simple text change",
-  "description": "Simple case where the supervisor avoids over-executing agents. Only clarity and ux are invoked.",
+  "description": "Simple case where the supervisor avoids over-executing agents. Clarity, ux and qa are invoked.",
   "expectedAgents": [],
   "expectedStatus": "",
   "request": {
