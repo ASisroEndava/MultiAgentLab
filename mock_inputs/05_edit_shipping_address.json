@@ -7,7 +7,7 @@
   "request": {
     "storyId": "story-005",
     "title": "Edit shipping address",
-    "storyText": "As a user, I want to edit my shipping address from my profile. The form should be easy to use and show autocomplete suggestions using the Google Maps API.",
+    "storyText": "As a user, I want to edit my shipping address directly from my profile with a simple inline form so I can make quick changes without navigating away. The edit should take immediate effect on all my orders, including those already being prepared for shipment. The form should provide direct autocomplete suggestions using the Google Maps API. The system should not ask for additional confirmation steps — the experience should be as simple and quick as possible.",
     "provider": {
       "type": "ollama",
       "model": "qwen2.5:3b",

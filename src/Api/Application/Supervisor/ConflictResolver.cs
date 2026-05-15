@@ -16,10 +16,16 @@ public sealed class ConflictResolver
 
         if (uxResult != null && techResult != null)
         {
-            var uxWantsSimplicity = uxResult.Recommendations
-                .Any(r => ContainsAny(r, "simple", "immediate", "quick", "direct", "inline"));
-            var techWantsRestriction = techResult.Issues
-                .Any(i => ContainsAny(i, "impact", "restriction", "state", "process", "consistency"));
+            var uxTexts = uxResult.Recommendations.Concat(uxResult.Issues);
+            var uxWantsSimplicity = uxTexts
+                .Any(r => ContainsAny(r, "simple", "immediate", "quick", "direct", "inline",
+                    "easy", "seamless", "streamlin", "one-click", "frictionless", "minimal", "fast",
+                    "toggle", "toast", "lightweight", "one-step", "skip"));
+            var techTexts = techResult.Issues.Concat(techResult.Recommendations);
+            var techWantsRestriction = techTexts
+                .Any(i => ContainsAny(i, "impact", "restriction", "state", "process", "consistency",
+                    "affect", "conflict", "order", "shipment", "prepared", "dispatch", "depend", "integrit",
+                    "rollback", "reconcil", "propagat", "idempoten", "race condition"));
 
             if (uxWantsSimplicity && techWantsRestriction)
             {
