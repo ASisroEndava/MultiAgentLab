@@ -37,6 +37,46 @@
 .mock-agents {
   display: flex; flex-wrap: wrap; gap: 0.375rem; margin-bottom: 0.75rem;
 }
+
+.mock-request {
+  margin-bottom: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  background: var(--mat-sys-surface-container-low);
+}
+
+.mock-request-row {
+  margin-bottom: 0.45rem;
+}
+
+.mock-request-row:last-child {
+  margin-bottom: 0;
+}
+
+.mock-request .label {
+  display: block;
+  margin-bottom: 0.1rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mat-sys-outline);
+}
+
+.mock-request .value {
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface);
+}
+
+.mock-request .story-text {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.45;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
 .agent-chip {
   padding: 0.2rem 0.5rem; border-radius: 999px;
   font-size: 0.7rem; font-weight: 600;

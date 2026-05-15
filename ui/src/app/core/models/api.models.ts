@@ -64,6 +64,9 @@ export interface MockCaseSummary {
   description: string;
   expectedAgents: string[];
   expectedStatus: string;
+  storyId: string;
+  requestTitle: string;
+  storyText: string;
 }
 
 export interface StartCaseResponse {

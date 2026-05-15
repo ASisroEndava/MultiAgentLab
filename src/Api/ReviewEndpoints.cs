@@ -577,7 +577,10 @@ public static class ReviewEndpoints
             c.Title,
             c.Description,
             c.ExpectedAgents,
-            c.ExpectedStatus
+            c.ExpectedStatus,
+            storyId = c.Request.StoryId,
+            requestTitle = c.Request.Title,
+            storyText = c.Request.StoryText
         });
         return Results.Ok(summary);
     }
